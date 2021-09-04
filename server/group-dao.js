@@ -348,6 +348,25 @@ exports.listGroupUsers = (courseCode) => {
 
 }
 
+// get group's meetings
+exports.listGroupMeetings = (courseCode) => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'SELECT * FROM meetings WHERE course_code = ?';
+		db.all(sql, [courseCode], (err, rows) => {
+			if (err) {
+				reject(err);
+				return;
+			}
+			// else if (rows === undefined)
+			// 	resolve({ error: 'Group's meetings not found.' });
+			// else
+			resolve(rows);
+		})
+	})
+
+}
+
 // get all meetings
 exports.listMeetings = () => {
 
@@ -359,7 +378,7 @@ exports.listMeetings = () => {
 				return;
 			}
 			// else if (rows === undefined)
-			// 	resolve({ error: 'Groups not found.' });
+			// 	resolve({ error: 'Meetings not found.' });
 			// else
 			resolve(rows);
 		})
@@ -378,7 +397,7 @@ exports.listUserMeetings = (studentCode) => {
 				return;
 			}
 			// else if (rows === undefined)
-			// 	resolve({ error: 'Meetings not found.' });
+			// 	resolve({ error: 'User's meetings not found.' });
 			// else
 			resolve(rows);
 		})

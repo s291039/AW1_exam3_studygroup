@@ -22,28 +22,25 @@ export default function ManageGroupsTable(props) {
 	const { otherGroupsList, setDirty, groupsList, loggedUserGroupsList, showModal, setShowModal } = props;
 
 	const [clickedCourseCode, setClickedCourseCode] = useState('');
-	const [showStudentsList, setShowStudentsList] = useState(false);
+	const [showLists, setShowLists] = useState(false);
 	const [clickedStudentsList, setClickedStudentsList] = useState([]);
+	const [clickedMeetingsList, setClickedMeetingsList] = useState([]);
 	const [groupToDelete, setGroupToDelete] = useState([]);
 
 
 	useEffect(() => {
 		const getGroupStudents = async () => {
 			const students = await API.getGroupStudents(clickedCourseCode);
-			// console.log(students);
-			// if (students !== undefined) {
 			let studentsInfo = [];
 			for (let i = 0; i < students.length; i++) {
 				const studInfo = await API.getUserInfo(students[i].student_code);
-				// console.log(studInfo);
 				studentsInfo.push(studInfo);
 			}
 			setClickedStudentsList(studentsInfo);
-			// setDirty(true);  // To force loading ? the first time
-			// }
-			// else {
-			// 	setClickedStudentsList([]);
-			// }
+		}
+		const getGroupMeetings = async () => {
+			const meetings = await API.getGroupMeetings(clickedCourseCode);
+			setClickedMeetingsList(meetings);
 		}
 		if (clickedCourseCode !== '') {
 			getGroupStudents()
@@ -52,7 +49,16 @@ export default function ManageGroupsTable(props) {
 				//  setDirty(false);
 				// })
 				.catch((err) => {
-					setMessage({ msg: "Impossible to load the students! Please, try again later...", type: 'danger' });
+					setMessage({ msg: "Impossible to load group's students! Please, try again later...", type: 'danger' });
+					console.error(err);
+				})
+			getGroupMeetings()
+				// .then(() => {
+				// 	setLoading(false);
+				//  setDirty(false);
+				// })
+				.catch((err) => {
+					setMessage({ msg: "Impossible to load group's meetings! Please, try again later...", type: 'danger' });
 					console.error(err);
 				})
 		}
@@ -64,21 +70,26 @@ export default function ManageGroupsTable(props) {
 		<tr key={s.student_code}>
 
 			<td className="text-left">
+
 				<span className="ml-4">
-					<small className="ml-1">
-						#
-					</small>
-					{idx + 1}
+					<Icons.PersonBadge
+						color="#343a40"
+						size="1.1em"
+					/>
+					<u className="ml-1">
+						{s.student_code}
+					</u>
 				</span>
-				<u className="ml-3">
-					{s.student_code}
-				</u>
-				<span className="ml-3 d-none d-md-inline d-lg-inline">
-					{s.student_name}
+
+				<span>
+					<span className="ml-3 d-none d-md-inline d-lg-inline">
+						{s.student_name}
+					</span>
+					<span className="ml-1 d-none d-sm-inline d-md-inline d-lg-inline">
+						{s.student_surname}
+					</span>
 				</span>
-				<span className="ml-3 d-none d-sm-inline d-md-inline d-lg-inline">
-					{s.student_surname}
-				</span>
+
 				{/* FIXME: fix this! */}
 				<small className="ml-3">
 					<Form.Switch
@@ -102,8 +113,9 @@ export default function ManageGroupsTable(props) {
 						}}
 					/>
 				</small>
+
 				<Icons.TrashFill
-					className="my-cursor-pointer"
+					className="ml-1 my-cursor-pointer"
 					color="red"
 					size="0.9em"
 					onClick={() => {
@@ -114,6 +126,60 @@ export default function ManageGroupsTable(props) {
 					}}
 				/>
 			</td>
+			<td className="d-none d-sm-table-cell d-md-table-cell d-lg-table-cell"></td>
+			<td className="d-none d-sm-table-cell d-md-table-cell d-lg-table-cell"></td>
+			<td className="d-none d-md-table-cell d-lg-table-cell"></td>
+			<td className="d-none d-md-table-cell d-lg-table-cell"></td>
+			<td></td>
+
+		</tr>
+
+	))
+
+	const getMeetingsTableRows = clickedMeetingsList.map((m, idx) => (
+
+		<tr key={m.meeting_id}>
+
+			<td className="text-left">
+
+				<span className="ml-4">
+					<Icons.Calendar2Event
+						className="ml-4"
+						color="#343a40"
+						size="1em"
+					/>
+					<span className="ml-1 my-meeting-datetime">
+						{dayjs(m.meetings_datetime).format("YYYY/MM/DD")}
+					</span>
+				</span>
+
+				<span>
+					<Icons.Clock
+						className="ml-4"
+						color="#343a40"
+						size="1em"
+					/>
+					<span className="ml-1 my-meeting-datetime">
+						{dayjs(m.meeting_datetime).format('HH:mm')}
+						<span className="d-none d-md-inline d-lg-inline">
+							{" - "}
+							{dayjs(m.meeting_datetime).add(m.meeting_duration, 'minute').format('HH:mm')}
+						</span>
+					</span>
+				</span>
+
+				<span className="ml-4">
+					<Icons.PinMap
+						color="#343a40"
+						size="1em"
+					/>
+					<span className="ml-1">
+						{m.meeting_place}
+					</span>
+				</span>
+
+			</td>
+			<td className="d-none d-sm-table-cell d-md-table-cell d-lg-table-cell"></td>
 			<td className="d-none d-sm-table-cell d-md-table-cell d-lg-table-cell"></td>
 			<td className="d-none d-md-table-cell d-lg-table-cell"></td>
 			<td className="d-none d-md-table-cell d-lg-table-cell"></td>
@@ -145,13 +211,13 @@ export default function ManageGroupsTable(props) {
 
 						<>
 							{/* TODO: check this! */}
-							{!showStudentsList && (clickedCourseCode === '') && (
+							{!showLists && (clickedCourseCode === '') && (
 
 								<Icons.ArrowDownCircleFill
 									className="ml-2 my-cursor-pointer"
 									onClick={() => {
 										setClickedCourseCode(g.course_code);
-										setShowStudentsList(!showStudentsList);
+										setShowLists(!showLists);
 									}}
 									color="#343a40"
 									size="1em"
@@ -159,14 +225,15 @@ export default function ManageGroupsTable(props) {
 
 							)}
 
-							{showStudentsList && (clickedCourseCode === g.course_code) && (
+							{showLists && (clickedCourseCode === g.course_code) && (
 
 								<Icons.ArrowUpCircleFill
 									className="ml-2 my-cursor-pointer"
 									onClick={() => {
 										setClickedCourseCode('');
 										setClickedStudentsList([]);
-										setShowStudentsList(!showStudentsList);
+										setClickedMeetingsList([]);
+										setShowLists(!showLists);
 									}}
 									color="#343a40"
 									size="1em"
@@ -185,7 +252,7 @@ export default function ManageGroupsTable(props) {
 					<small>
 						since
 						<span className="ml-2">
-							{dayjs(g.group_creation_date).format('YYYY.MM.DD')}
+							{dayjs(g.group_creation_date).format('YYYY/MM/DD')}
 						</span>
 					</small>
 				</td>
@@ -196,6 +263,16 @@ export default function ManageGroupsTable(props) {
 					<Icons.PeopleFill
 						className="ml-2"
 						color={g.group_students_number === 0 ? "#f6c93c" : "#343a40"}
+						size="1em"
+					/>
+				</td>
+				<td className="text-center d-none d-sm-table-cell d-md-table-cell d-lg-table-cell">
+					<small className={g.group_meetings_number === 0 ? "text-warning" : "text-dark"}>
+						{g.group_meetings_number}
+					</small>
+					<Icons.Calendar2WeekFill
+						className="ml-2"
+						color={g.group_meetings_number === 0 ? "#f6c93c" : "#343a40"}
 						size="1em"
 					/>
 				</td>
@@ -219,9 +296,10 @@ export default function ManageGroupsTable(props) {
 				</td>
 			</tr>
 
-			{showStudentsList && (clickedCourseCode === g.course_code) && (
+			{showLists && (clickedCourseCode === g.course_code) && (
 				<>
 					{getStudentsTableRows}
+					{getMeetingsTableRows}
 				</>
 			)}
 

@@ -247,6 +247,24 @@ async function getGroupStudents(courseCode) {
 
 }
 
+// call: GET /api/groups/:course_code/meetings
+async function getGroupMeetings(courseCode) {
+
+	try {
+		const response = await fetch(BASEURL + `/groups/${courseCode}/meetings`);
+		const responseJson = await response.json();
+
+		if (response.ok) {
+			return responseJson;
+		}
+		else
+			throw responseJson;	// an object with the error coming from the server
+	} catch (err) {
+		throw err;
+	}
+
+}
+
 // call: GET /api/meetings
 async function getAllMeetings() {
 
@@ -570,5 +588,5 @@ async function updateStudent(studentCode, groupAdmin) {
 }
 
 
-const API = { addGroup, addOtherGroup, removeGroup, removeOtherGroup, getAllGroups, getOtherGroups, getStudentGroups, getGroupStudents, getAllMeetings, getStudentMeetings, updateMeetingStudentsNumber, addGroupRequest, approveGroupRequest, addMeetingRegistration, removeMeetingRegistration, removeUserFromGroup, signUp, logIn, getCurrentUserInfo, logOut, getUserInfo, updateStudent }
+const API = { addGroup, addOtherGroup, removeGroup, removeOtherGroup, getAllGroups, getOtherGroups, getStudentGroups, getGroupStudents, getGroupMeetings, getAllMeetings, getStudentMeetings, updateMeetingStudentsNumber, addGroupRequest, approveGroupRequest, addMeetingRegistration, removeMeetingRegistration, removeUserFromGroup, signUp, logIn, getCurrentUserInfo, logOut, getUserInfo, updateStudent }
 export default API;

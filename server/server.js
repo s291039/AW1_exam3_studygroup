@@ -433,6 +433,24 @@ app.get('/api/groups/:course_code/students',
 	}
 )
 
+// GET /api/groups/:course_code/meetings
+app.get('/api/groups/:course_code/meetings',
+	isLoggedIn,
+	async (req, res) => {
+		try {
+			const result = await groupDao.listGroupMeetings(req.params.course_code);
+			// if (result.error)
+			// 	res.status(404).json(result);
+			// else
+			res.json(result);
+		} catch (err) {
+			// res.status(500).json({ error: `Database error: ${err}.` });
+			res.status(500).end;
+		}
+
+	}
+)
+
 // GET /api/meetings
 app.get('/api/meetings',
 	isLoggedIn,

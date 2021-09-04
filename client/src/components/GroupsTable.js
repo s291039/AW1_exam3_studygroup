@@ -45,7 +45,7 @@ export default function GroupsTable(props) {
 				<small>
 					since
 					<span className="ml-2">
-						{dayjs(g.group_creation_date).format('YYYY.MM.DD')}
+						{dayjs(g.group_creation_date).format('YYYY/MM/DD')}
 					</span>
 				</small>
 			</td>
