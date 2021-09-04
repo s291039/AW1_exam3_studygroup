@@ -80,7 +80,7 @@ exports.registerUser = (userInfo) => {
 									if (err)
 										reject(err);
 									else
-										resolve(true);	// inserted a new user in users (db table)
+										resolve(true);	// inserted a new user in students (db table)
 								})
 						})
 						.catch((error) => {
