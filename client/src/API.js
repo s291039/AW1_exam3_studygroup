@@ -98,7 +98,7 @@ async function addGroup(group) {
 				course_name: group.course_name,
 				course_credits: group.course_credits,
 				group_color: group.group_color,
-				group_creation_date: dayjs().toISOString(),
+				group_creation_date: dayjs().format('DD-MM-YYYY'), // TODO: check this!
 				group_students_number: 0
 			})
 		})

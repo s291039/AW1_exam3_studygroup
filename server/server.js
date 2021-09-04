@@ -266,7 +266,7 @@ app.post('/api/groups',
 		check('course_name').isString().notEmpty(),
 		check('course_credits').isInt().notEmpty(),
 		check('group_color').isString().notEmpty(),
-		check('group_creation_date').isISO8601({ strict: true }),
+		check('group_creation_date').isDate(), // TODO: check this!
 		check('group_students_number').isInt({ value: 0 }),
 	],
 	async (req, res) => {
