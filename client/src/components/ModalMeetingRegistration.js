@@ -25,10 +25,14 @@ export default function ModalMeetingRegistration(props) {
 		event.stopPropagation();
 
 		// TODO: check this!
-		if (AmIRegistering)
-			API.addMeetingRegistration('s291039', meetingRegistrationInfo.meeting_id);
-		else
-			API.removeMeetingRegistration('s291039', meetingRegistrationInfo.meeting_id);
+		if (AmIRegistering) {
+			API.addMeetingRegistration(loggedUser.student_code, meetingRegistrationInfo.meeting_id);
+			API.updateMeetingStudentsNumber(meetingRegistrationInfo.meeting_id, +1);
+		}
+		else {
+			API.removeMeetingRegistration(loggedUser.student_code, meetingRegistrationInfo.meeting_id);
+			API.updateMeetingStudentsNumber(meetingRegistrationInfo.meeting_id, -1);
+		}
 
 		setMeetingRegistrationInfo([]);
 		setDirty(true);

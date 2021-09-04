@@ -1,6 +1,3 @@
-//import dayjs from 'dayjs';
-import Group from './models/Group.js';
-import Meeting from './models/Meeting.js';
 const BASEURL = '/api';
 import dayjs from 'dayjs';
 
@@ -98,7 +95,7 @@ async function addGroup(group) {
 				course_name: group.course_name,
 				course_credits: group.course_credits,
 				group_color: group.group_color,
-				group_creation_date: dayjs().format('DD-MM-YYYY'), // TODO: check this!
+				group_creation_date: dayjs().format('YYYY-MM-DD'), // TODO: check this!
 				group_students_number: 0
 			})
 		})
@@ -181,73 +178,54 @@ async function removeOtherGroup(courseCode) {
 // call: GET /api/groups
 async function getAllGroups() {
 
-	// try {
-	const response = await fetch(BASEURL + '/groups');
-	const responseJson = await response.json();
+	try {
+		const response = await fetch(BASEURL + '/groups');
+		const responseJson = await response.json();
 
-	if (response.ok) {
-		return responseJson;
-		// return responseJson.map((g) => Group.from(g));
+		if (response.ok) {
+			return responseJson;
+		}
+		else
+			throw responseJson;	// an object with the error coming from the server
+	} catch (err) {
+		throw err;
 	}
-	else
-		throw responseJson;	// an object with the error coming from the server
-	// } catch (err) {
-	// 	throw err;
-	// }
 
 }
 
 // call: GET /api/other_groups
 async function getOtherGroups() {
 
-	// try {
-	const response = await fetch(BASEURL + '/other_groups');
-	const responseJson = await response.json();
+	try {
+		const response = await fetch(BASEURL + '/other_groups');
+		const responseJson = await response.json();
 
-	if (response.ok) {
-		return responseJson;
+		if (response.ok) {
+			return responseJson;
+		}
+		else
+			throw responseJson;	// an object with the error coming from the server
+	} catch (err) {
+		throw err;
 	}
-	else
-		throw responseJson;	// an object with the error coming from the server
-	// } catch (err) {
-	// 	throw err;
-	// }
-
-}
-
-// call: GET /api/groups/:course_code/students_number
-async function getGroupStudentsNumber(courseCode) {
-
-	// try {
-	const response = await fetch(BASEURL + `/groups/${courseCode}/students_number`);
-	const responseJson = await response.json();
-
-	if (response.ok) {
-		return responseJson;
-	}
-	else
-		throw responseJson;	// an object with the error coming from the server
-	// } catch (err) {
-	// 	throw err;
-	// }
 
 }
 
 // call: GET /api/users/:student_code/groups
 async function getStudentGroups(studentCode) {
 
-	// try {
-	const response = await fetch(BASEURL + `/users/${studentCode}/groups`);
-	const responseJson = await response.json();
+	try {
+		const response = await fetch(BASEURL + `/users/${studentCode}/groups`);
+		const responseJson = await response.json();
 
-	if (response.ok) {
-		return responseJson;
+		if (response.ok) {
+			return responseJson;
+		}
+		else
+			throw responseJson;	// an object with the error coming from the server
+	} catch (err) {
+		throw err;
 	}
-	else
-		throw responseJson;	// an object with the error coming from the server
-	// } catch (err) {
-	// 	throw err;
-	// }
 
 }
 
@@ -272,36 +250,18 @@ async function getGroupStudents(courseCode) {
 // call: GET /api/meetings
 async function getAllMeetings() {
 
-	// try {
-	const response = await fetch(BASEURL + '/meetings');
-	const responseJson = await response.json();
+	try {
+		const response = await fetch(BASEURL + '/meetings');
+		const responseJson = await response.json();
 
-	if (response.ok) {
-		return responseJson.map((m) => Meeting.from(m));
+		if (response.ok) {
+			return responseJson;
+		}
+		else
+			throw responseJson;	// an object with the error coming from the server
+	} catch (err) {
+		throw err;
 	}
-	else
-		throw responseJson;	// an object with the error coming from the server
-	// } catch (err) {
-	// 	throw err;
-	// }
-
-}
-
-// call: GET /api/meetings/:meeting_id/students_number
-async function getMeetingStudentsNumber(meetingId) {
-
-	// try {
-	const response = await fetch(BASEURL + `/meetings/${meetingId}/students_number`);
-	const responseJson = await response.json();
-
-	if (response.ok) {
-		return responseJson;
-	}
-	else
-		throw responseJson;	// an object with the error coming from the server
-	// } catch (err) {
-	// 	throw err;
-	// }
 
 }
 
@@ -317,6 +277,30 @@ async function getStudentMeetings(studentCode) {
 		}
 		else
 			throw responseJson;	// an object with the error coming from the server
+	} catch (err) {
+		throw err;
+	}
+
+}
+
+// call: PUT /api/meetings/:meeting_id
+async function updateMeetingStudentsNumber(meetingId, updateNumber) {
+
+	try {
+		const response = await fetch(BASEURL + `/meetings/${meetingId}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				meeting_id: meetingId,
+				update_number: updateNumber
+			})
+		})
+		const responseJson = await response.json();
+
+		if (response.ok)
+			return responseJson;
+		else
+			throw responseJson;
 	} catch (err) {
 		throw err;
 	}
@@ -586,5 +570,5 @@ async function updateStudent(studentCode, groupAdmin) {
 }
 
 
-const API = { addGroup, addOtherGroup, removeGroup, removeOtherGroup, getAllGroups, getOtherGroups, getGroupStudentsNumber, getStudentGroups, getGroupStudents, getAllMeetings, getMeetingStudentsNumber, getStudentMeetings, addGroupRequest, approveGroupRequest, addMeetingRegistration, removeMeetingRegistration, removeUserFromGroup, signUp, logIn, getCurrentUserInfo, logOut, getUserInfo, updateStudent }
+const API = { addGroup, addOtherGroup, removeGroup, removeOtherGroup, getAllGroups, getOtherGroups, getStudentGroups, getGroupStudents, getAllMeetings, getStudentMeetings, updateMeetingStudentsNumber, addGroupRequest, approveGroupRequest, addMeetingRegistration, removeMeetingRegistration, removeUserFromGroup, signUp, logIn, getCurrentUserInfo, logOut, getUserInfo, updateStudent }
 export default API;

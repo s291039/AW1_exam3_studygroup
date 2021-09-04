@@ -45,13 +45,13 @@ export default function GroupsTable(props) {
 				<small>
 					since
 					<span className="ml-2">
-						{dayjs(g.group_creation_date).format('DD.MM.YYYY')}
+						{dayjs(g.group_creation_date).format('YYYY.MM.DD')}
 					</span>
 				</small>
 			</td>
 			<td className="text-center d-none d-sm-table-cell d-md-table-cell d-lg-table-cell">
 				<small>
-					{g.students_number}
+					{g.group_students_number}
 				</small>
 				<Icons.PeopleFill
 					className="ml-2"

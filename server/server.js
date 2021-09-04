@@ -391,27 +391,6 @@ app.get('/api/other_groups',
 	}
 )
 
-// GET /api/groups/:course_code/students_number
-app.get('/api/groups/:course_code/students_number',
-	isLoggedIn,
-	[
-		check('course_code').isString().isLength(7)
-	],
-	async (req, res) => {
-		try {
-			const result = await groupDao.getGroupStudentsNumber(req.params.course_code);
-			// if (result.error)
-			// 	res.status(404).json(result);
-			// else
-			res.json(result);
-		} catch (err) {
-			// res.status(500).json({ error: `Database error: ${err}.` });
-			res.status(500).end;
-		}
-
-	}
-)
-
 // GET /api/users/:student_code/groups
 app.get('/api/users/:student_code/groups',
 	isLoggedIn,
@@ -472,27 +451,6 @@ app.get('/api/meetings',
 	}
 )
 
-// GET /api/meetings/:meeting_id/students_number
-app.get('/api/meetings/:meeting_id/students_number',
-	isLoggedIn,
-	[
-		check('meeting_id').isInt({ min: 1 })
-	],
-	async (req, res) => {
-		try {
-			const result = await groupDao.getMeetingStudentsNumber(req.params.meeting_id);
-			// if (result.error)
-			// 	res.status(404).json(result);
-			// else
-			res.json(result);
-		} catch (err) {
-			// res.status(500).json({ error: `Database error: ${err}.` });
-			res.status(500).end;
-		}
-
-	}
-)
-
 // GET /api/users/:student_code/meetings
 app.get('/api/users/:student_code/meetings',
 	isLoggedIn,
@@ -513,6 +471,29 @@ app.get('/api/users/:student_code/meetings',
 
 	}
 )
+
+// PUT /api/meetings/:meeting_id
+app.put('/api/meetings/:meeting_id',
+	isLoggedIn,
+	[
+		check('meeting_id').isInt({ min: 1 })
+	],
+	async (req, res) => {
+		// const errors = validationResult(req).formatWith(errorFormatter); // format error message
+		// if (!errors.isEmpty()) {
+		// 	return res.status(422).json({ error: errors.array().join(", ") }); // error message is a single string with all error joined together
+		// }
+
+		try {
+			const result = await groupDao.updateMeetingStudentsNumbers(req.body.meeting_id, req.body.update_number);
+			res.status(200).json(result).end();
+		} catch (err) {
+			res.status(503).json({ error: `Database error during the update of meeting students number: ${err}.` });
+		}
+
+	}
+)
+
 
 // POST /api/users/:student_code/groups/:course_code/request
 app.post('/api/users/:student_code/groups/:course_code/request',

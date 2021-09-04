@@ -27,31 +27,6 @@ const db = require('./db');
  */
 
 
-// TODO: delete this!
-function dbRowToGroup(dbGroup) {
-	return {
-		course_code: dbGroup.course_code,
-		course_name: dbGroup.course_name,
-		course_credits: dbGroup.course_credits,
-		group_color: dbGroup.group_color,
-		group_creation_date: dbGroup.group_creation_date
-		// num_students: dbGroup.num_students,
-		// num_group_admins: dbGroup.num_group_admins,
-		// num_meetings: dbGroup.num_meetings
-	}
-}
-// TODO: delete this!
-function dbRowToMeeting(dbMeeting) {
-	return {
-		meeting_id: dbMeeting.meeting_id,
-		course_name: dbMeeting.course_name,
-		meeting_datetime: dbMeeting.meeting_datetime,
-		meeting_duration: dbMeeting.meeting_duration,
-		meeting_place: dbMeeting.meeting_place
-	}
-}
-
-
 exports.getUserInfo = (studentCode) => {
 
 	return new Promise((resolve, reject) => {
@@ -309,11 +284,8 @@ exports.listAllGroups = () => {
 			}
 			// else if (rows === undefined)
 			// 	resolve({ error: 'Groups not found.' });
-			// else {
-			//const groups = { ...rows };
-			const groups = rows.map((row) => dbRowToGroup(row));
-			resolve(groups);
-			// }
+			// else
+			resolve(rows);
 		})
 	})
 
@@ -330,33 +302,9 @@ exports.listOtherGroups = () => {
 				return;
 			}
 			// else if (rows === undefined)
-			// 	resolve({ error: 'Groups not found.' });
-			// else {
-			//const groups = { ...rows };
-			// const groups = rows.map((row) => dbRowToGroup(row));
+			// 	resolve({ error: 'Other groups not found.' });
+			// else
 			resolve(rows);
-			// }
-		})
-	})
-
-}
-
-// get group students number
-exports.getGroupStudentsNumber = (courseCode) => {
-
-	return new Promise((resolve, reject) => {
-		const sql = 'SELECT COUNT(student_code) AS students_number FROM students_groups WHERE course_code = ?';
-		db.all(sql, [courseCode], (err, row) => {
-			if (err) {
-				reject(err);
-				return;
-			}
-			// else if (rows === undefined)
-			// 	resolve({ error: 'Groups not found.' });
-			// else {
-			//const groups = { ...rows };
-			resolve(row);
-			// }
 		})
 	})
 
@@ -374,10 +322,8 @@ exports.listUserGroups = (studentCode) => {
 			}
 			// else if (rows === undefined)
 			// 	resolve({ error: 'Groups not found.' });
-			// else {
-			//const groups = { ...rows };
+			// else
 			resolve(rows);
-			// }
 		})
 	})
 
@@ -414,11 +360,8 @@ exports.listMeetings = () => {
 			}
 			// else if (rows === undefined)
 			// 	resolve({ error: 'Groups not found.' });
-			// else {
-			//const groups = { ...rows };
-			const meetings = rows.map((row) => dbRowToMeeting(row));
-			resolve(meetings);
-			// }
+			// else
+			resolve(rows);
 		})
 	})
 
@@ -436,32 +379,32 @@ exports.listUserMeetings = (studentCode) => {
 			}
 			// else if (rows === undefined)
 			// 	resolve({ error: 'Meetings not found.' });
-			// else {
-			//const meetings = { ...rows };
+			// else
 			resolve(rows);
-			// }
 		})
 	})
 
 }
 
-// get meeting students number
-exports.getMeetingStudentsNumber = (meetingId) => {
+// update an existing meeting students number
+exports.updateMeetingStudentsNumbers = (meetingId, updateNumber) => {
 
 	return new Promise((resolve, reject) => {
-		const sql = 'SELECT COUNT(student_code) AS students_number FROM students_meetings WHERE meeting_id = ?';
-		db.all(sql, [meetingId], (err, row) => {
-			if (err) {
-				reject(err);
-				return;
+		const sql =
+			'UPDATE meetings SET meeting_students_number = meeting_students_number + ? WHERE meeting_id = ?';
+		db.run(sql,
+			[
+				updateNumber,
+				meetingId
+			],
+			(err) => {
+				if (err)
+					reject(err);
+				else
+					// resolve(this.lastID);
+					resolve(this.changes);
 			}
-			// else if (rows === undefined)
-			// 	resolve({ error: 'Meetings not found.' });
-			// else {
-			//const meetings = { ...rows };
-			resolve(row);
-			// }
-		})
+		)
 	})
 
 }

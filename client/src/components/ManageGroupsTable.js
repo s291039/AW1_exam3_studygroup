@@ -4,7 +4,7 @@ import { Redirect, Link, useHistory } from 'react-router-dom';
 import { CurrentUserName, CurrentMessage } from '../App.js'
 import * as Icons from 'react-bootstrap-icons';
 import Navigation from './Navigation.js';
-import ModalAddDeleteGroup from './ModalAddDeleteGroup.js';
+import ModalGroupAddDelete from './ModalGroupAddDelete.js';
 import AddButton from './AddButton.js';
 import dayjs from 'dayjs';
 import API from '../API.js'
@@ -23,9 +23,6 @@ export default function ManageGroupsTable(props) {
 
 	const [clickedCourseCode, setClickedCourseCode] = useState('');
 	const [showStudentsList, setShowStudentsList] = useState(false);
-	// const [clickedStudentsList, setClickedStudentsList] = useState([{
-	// 	student_code: 's291039', student_name: 'Francesco', student_surname: 'Lonardo', general_admin: false, group_admin: true
-	// }]);
 	const [clickedStudentsList, setClickedStudentsList] = useState([]);
 	const [groupToDelete, setGroupToDelete] = useState([]);
 
@@ -144,7 +141,7 @@ export default function ManageGroupsTable(props) {
 						(<u>{g.course_code}</u>)
 					</span>
 
-					{g.students_number !== 0 && (
+					{g.group_students_number !== 0 && (
 
 						<>
 							{/* TODO: check this! */}
@@ -188,35 +185,19 @@ export default function ManageGroupsTable(props) {
 					<small>
 						since
 						<span className="ml-2">
-							{dayjs(g.group_creation_date).format('DD.MM.YYYY')}
+							{dayjs(g.group_creation_date).format('YYYY.MM.DD')}
 						</span>
 					</small>
 				</td>
 				<td className="text-center d-none d-sm-table-cell d-md-table-cell d-lg-table-cell">
-					{g.students_number === 0 ? (
-						<>
-							<small className="text-warning">
-								{g.students_number}
-							</small>
-							<Icons.PeopleFill
-								className="ml-2"
-								color="#f6c93c"
-								size="1em"
-							/>
-						</>
-					) : (
-						<>
-							<small>
-								{g.students_number}
-							</small>
-							<Icons.PeopleFill
-								className="ml-2"
-								color="#343a40"
-								size="1em"
-							/>
-						</>
-					)}
-
+					<small className={g.group_students_number === 0 ? "text-warning" : "text-dark"}>
+						{g.group_students_number}
+					</small>
+					<Icons.PeopleFill
+						className="ml-2"
+						color={g.group_students_number === 0 ? "#f6c93c" : "#343a40"}
+						size="1em"
+					/>
 				</td>
 				<td className="text-center">
 					<Icons.TrashFill
@@ -299,7 +280,7 @@ export default function ManageGroupsTable(props) {
 						</Table>
 
 						{/* Modal */}
-						<ModalAddDeleteGroup
+						<ModalGroupAddDelete
 							otherGroupsList={otherGroupsList}
 							setDirty={setDirty}
 							showModal={showModal}

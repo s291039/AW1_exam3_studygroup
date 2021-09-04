@@ -5,7 +5,7 @@ import { CurrentUserName, CurrentMessage } from '../App.js'
 import API from '../API.js';
 
 
-export default function ModalAddDeleteGroup(props) {
+export default function ModalGroupAddDelete(props) {
 
 	const location = useLocation();
 	const AmIAddingGroup = location.pathname === '/manage_groups/add';

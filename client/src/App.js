@@ -19,8 +19,6 @@ const CurrentMessage = React.createContext();
 export default function App() {
 
 	const [loggedUser, setLoggedUser] = useState([]);	// at the beginning, no user logged in
-	// const [loggedUserName, setLoggedUserName] = useState('');	// at the beginning, no user logged in
-	// const [loggedUserRole, setLoggedUserRole] = useState('');	// at the beginning, no user logged in
 	const [message, setMessage] = useState('');
 
 	const [loading, setLoading] = useState(false);
@@ -71,13 +69,7 @@ export default function App() {
 	useEffect(() => {
 		const getAllGroups = async () => {
 			const groups = await API.getAllGroups();
-			for (let i = 0; i < groups.length; i++) {
-				const group_students_number = await API.getGroupStudentsNumber(groups[i].course_code);
-				// console.log(group_students_number[0].students_number);
-				groups[i].students_number = group_students_number[0].students_number;
-			}
 			setGroupsList(groups);
-			// setDirty(true);  // To force loading ? the first time
 		}
 		if (loggedUser.student_code || dirty) {
 			getAllGroups()
@@ -94,9 +86,8 @@ export default function App() {
 
 	useEffect(() => {
 		const getLoggedUserGroups = async () => {
-			const userGroups = await API.getStudentGroups('s291039');
+			const userGroups = await API.getStudentGroups(loggedUser.student_code);
 			setLoggedUserGroupsList(userGroups);
-			// setDirty(true);  // To force loading ? the first time
 		}
 		if (loggedUser.student_code || dirty) {
 			getLoggedUserGroups()
@@ -115,7 +106,6 @@ export default function App() {
 		const getOtherGroups = async () => {
 			const otherGroups = await API.getOtherGroups();
 			setOtherGroupsList(otherGroups);
-			// setDirty(true);  // To force loading ? the first time
 		}
 		if (loggedUser.student_code || dirty) {
 			getOtherGroups()
@@ -133,14 +123,8 @@ export default function App() {
 	useEffect(() => {
 		const getAllMeetings = async () => {
 			const meetings = await API.getAllMeetings();
-			for (let i = 0; i < meetings.length; i++) {
-				const meeting_students_number = await API.getMeetingStudentsNumber(meetings[i].meeting_id);
-				// console.log(meeting_students_number[0].students_number);
-				meetings[i].students_number = meeting_students_number[0].students_number;
-			}
 			meetings.sort((firstM, secondM) => compareByDatetime(firstM.meeting_datetime, secondM.meeting_datetime));
 			setMeetingsList(meetings);
-			// setDirty(true);  // To force loading ? the first time
 		}
 		if (loggedUser.student_code || dirty) {
 			getAllMeetings()
@@ -149,7 +133,7 @@ export default function App() {
 					setDirty(false);
 				})
 				.catch((err) => {
-					setMessage({ msg: "Impossible to load all the meetings! Please, try again later...", type: 'danger' });
+					setMessage({ msg: "Impossible to load all meetings! Please, try again later...", type: 'danger' });
 					console.error(err);
 				})
 		}
@@ -157,9 +141,8 @@ export default function App() {
 
 	useEffect(() => {
 		const getLoggedUserMeetings = async () => {
-			const userMeetings = await API.getStudentMeetings('s291039');
+			const userMeetings = await API.getStudentMeetings(loggedUser.student_code);
 			setLoggedUserMeetingsList(userMeetings);
-			// setDirty(true);  // To force loading ? the first time
 		}
 		if (loggedUser.student_code || dirty) {
 			getLoggedUserMeetings()
@@ -168,7 +151,7 @@ export default function App() {
 					setDirty(false);
 				})
 				.catch(err => {
-					setMessage({ msg: "Impossible to load user meetings! Please, try again later...", type: 'danger' });
+					setMessage({ msg: "Impossible to load logged user meetings! Please, try again later...", type: 'danger' });
 					console.error(err);
 				})
 		}

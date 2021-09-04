@@ -129,7 +129,7 @@ export default function MeetingsTable(props) {
 					</td>
 					<td className="text-right">
 						<small>
-							{m.students_number}
+							{m.meeting_students_number}
 						</small>
 						<Icons.PeopleFill
 							className="ml-2"
