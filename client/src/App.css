@@ -1,0 +1,318 @@
+/*
+ * 576px = sm breakpoint
+ * 768px = md breakpoint
+ * 992px = lg breakpoint
+ */
+
+/********************** Global style ***********************/
+:root {
+	--main-bg: #343a40;
+	--main-fg: #007bff;
+}
+.my-link {
+	text-decoration: none;
+	color: black;
+}
+.my-link:hover {
+	text-decoration: none;
+	color: black;
+}
+.my-tablepage-title {
+	font-size: 50px;
+}
+.my-course-name {
+	font-size: 1em;
+	font-weight: 600;
+}
+.my-meeting-datetime {
+	font-size: 0.9em;
+	font-weight: 600;
+}
+.my-scrollable-container {
+	overflow-y: auto;
+	height: 95%;
+	margin-right: auto;
+	margin-left: auto;
+	align-content: flex-start;
+}
+.scrollbar::-webkit-scrollbar {
+	width: 10px;
+}
+.scrollbar::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+	background: #f1f1f1;
+}
+.scrollbar::-webkit-scrollbar-thumb {
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+	background-color: #c9c9c9;
+	border-radius: 7px;
+}
+.scrollbar::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+.my-breadcrumb-location {
+	position: fixed;
+	bottom: -18px;
+	width: 100%;
+	font-size: 0.6em;
+}
+.breadcrumb {
+	background-color: #ebebeb;
+}
+.my-modal-title {
+	font-size: 28px;
+	font-weight: 600;
+}
+
+/************************* App.js **************************/
+.my-app {
+	/* background-color: #f5f5f5;
+	min-height: 100%;
+	min-width: 100%; */
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	position: absolute;
+	text-align: center;
+}
+.my-homepage {
+	/* padding-top: 35%; */
+	padding-top: 5%;
+	/* display: -ms-flexbox;
+	display: -webkit-box;
+	display: flex;
+	-ms-flex-align: center;
+	-ms-flex-pack: center;
+	-webkit-box-align: center;
+	align-items: center;
+	-webkit-box-pack: center;
+	justify-content: center; */
+}
+.my-homepage .my-button {
+	width: 100%;
+	max-width: 325px;
+	min-width: 325px;
+}
+.my-sign-up {
+	font-size: 17px;
+}
+
+/*********************** LoginForm.js **********************/
+.my-login-signup-form {
+	width: 100%;
+	max-width: 353px;
+	min-width: 353px;
+	padding: 15px;
+	margin: 0 auto;
+	font-weight: 400;
+	margin-bottom: 0px;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+.my-login-signup-form .form-control {
+	position: relative;
+	/* font-size: 13px;
+	box-sizing: border-box;
+	height: auto;
+	padding: 12px; */
+}
+.my-login-signup-form .form-control:focus {
+	z-index: 2;
+}
+.my-go-back {
+	font-size: 17px;
+}
+
+/*********************** MainPage.js ***********************/
+.my-main-row {
+	margin-left: auto;
+	margin-right: auto;
+	/* overflow-y: auto;
+	height: 100%;
+	align-content: flex-start; */
+}
+.scrollbar::-webkit-scrollbar {
+	width: 10px;
+}
+.scrollbar::-webkit-scrollbar-thumb {
+	background-color: #c9c9c9;
+	border-radius: 7px;
+}
+.scrollbar::-webkit-scrollbar-track {
+	background: #f1f1f1;
+}
+.scrollbar::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+.my-sidebar {
+	/* position: sticky;
+	top: 0;
+	z-index: 10; */
+}
+
+/********************** Navigation.js **********************/
+.my-cursor-pointer,
+.custom-checkbox > [type='checkbox'] + label {
+	/* Cursor style (icons and checkboxes) */
+	cursor: pointer;
+}
+.navbar .dropdown-menu.show {
+	min-width: 50px;
+	font-size: 0.7em;
+	text-align: end;
+}
+.my-link-navigation {
+	text-decoration: none;
+	color: white;
+}
+.my-link-navigation:hover {
+	text-decoration: none;
+	color: white;
+}
+@media (max-width: 768px) {
+	.my-mr-navigation {
+		margin-right: 7;
+	}
+}
+
+/******************** SidebarFilters.js ********************/
+/*
+ * Force the Sidebar to be always displayed when
+ * the window is big enough.
+ * This fixes an edge case that resulted in the
+ * collapsing animation to play when not needed.
+ */
+@media (min-width: 768px) {
+	.collapsing {
+		height: 100% !important;
+	}
+}
+.my-listgroup {
+	position: sticky;
+	top: 0;
+}
+@media (min-width: 768px) {
+	.list-group-item {
+		height: 2.6em;
+		padding: 0.3em 1.8em;
+		font-size: 0.9em;
+		text-align: start;
+	}
+}
+@media (max-width: 768px) {
+	.list-group-item {
+		height: 2.8em;
+		padding: 0.6em;
+		font-size: 0.9em;
+		text-align: center;
+	}
+	.list-group-item:not(.active) {
+		background-color: var(--main-bg);
+		border-color: var(--main-bg);
+		color: white;
+	}
+	.list-group-item:not(.active):hover {
+		color: #78b8fd;
+	}
+}
+
+/********************* GroupsTable.js ***********************/
+
+/******************** MeetingsTable.js **********************/
+.table {
+	outline-style: solid;
+	outline-color: #dddddd;
+	outline-width: 1px;
+}
+.container-calendars-icons:hover .calendar-icon-1,
+.container-calendars-icons .calendar-icon-2 {
+	display: none;
+}
+.container-calendars-icons:hover .calendar-icon-2 {
+	display: inline;
+}
+
+/*********************** ModalAddGroup.js **********************/
+select {
+	max-width: 70%;
+	min-width: 70%;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+.my-addgroup-form .form-control {
+	position: relative;
+	/* font-size: 13px;
+	box-sizing: border-box;
+	height: auto;
+	padding: 12px; */
+}
+.my-addgroup-form .form-control:focus {
+	z-index: 2;
+}
+/* .my-addgroup-form .form-label {
+	position: relative;
+	font-size: 13px;
+	box-sizing: border-box;
+	height: auto;
+	padding: 12px;
+} */
+
+/********************* ContentList.js ***********************/
+@media (max-width: 576px) {
+	.my-tooltip {
+		background-color: var(--main-bg);
+		color: white;
+		height: 65px;
+		width: 140px;
+		border-radius: 7px;
+		font-size: 0.6em;
+	}
+}
+@media (min-width: 576px) {
+	.my-tooltip {
+		background-color: var(--main-bg);
+		color: white;
+		height: 80px;
+		width: 160px;
+		border-radius: 7px;
+		font-size: 0.8em;
+	}
+}
+@media (max-width: 576px) {
+	.my-figurecaption-title {
+		font-size: 12px;
+	}
+	.my-figurecaption-creator {
+		font-size: 11px;
+		font-weight: 400;
+	}
+}
+@media (min-width: 576px) {
+	.my-figurecaption-title {
+		font-size: 16px;
+	}
+	.my-figurecaption-creator {
+		font-size: 13px;
+		font-weight: 400;
+	}
+}
+
+/********************** AddButton.js ***********************/
+button.rounded-circle {
+	position: fixed;
+	bottom: 46px;
+	right: 23px;
+	height: 50px;
+	width: 50px;
+	font-size: 1.5em;
+}
+
+/********************** ErrorAlert.js **********************/
+.my-alert-title {
+	font-size: 17px;
+	font-weight: 400;
+}
+.my-alert-subtitle {
+	font-size: 15px;
+	font-weight: 300;
+}
