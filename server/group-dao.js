@@ -329,6 +329,28 @@ exports.listUserGroups = (studentCode) => {
 
 }
 
+// update an existing group students number
+exports.updateGroupStudentsNumbers = (courseCode, updateNumber) => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'UPDATE groups SET group_students_number = group_students_number + ? WHERE course_code = ?';
+		db.run(sql,
+			[
+				updateNumber,
+				courseCode
+			],
+			(err) => {
+				if (err)
+					reject(err);
+				else
+					// resolve(this.lastID);
+					resolve(this.changes);
+			}
+		)
+	})
+
+}
+
 // get group's users
 exports.listGroupUsers = (courseCode) => {
 
@@ -523,12 +545,11 @@ exports.deleteMeetingRegistration = (meetingRegistration) => {
 
 }
 
-// delete a meeting registration
-exports.deleteUserFromGroup = (studentCode, courseCode) => {
+// delete a student from a group
+exports.deleteGroupStudent = (courseCode, studentCode) => {
 
 	return new Promise((resolve, reject) => {
-		const sql =
-			'DELETE FROM students_groups WHERE student_code = ? AND course_code = ?';
+		const sql = 'DELETE FROM students_groups WHERE student_code = ? AND course_code = ?';
 		db.run(sql,
 			[
 				studentCode,
@@ -538,7 +559,6 @@ exports.deleteUserFromGroup = (studentCode, courseCode) => {
 				if (err)
 					reject(err);
 				else
-					// resolve(this.change);
 					resolve();
 			}
 		)

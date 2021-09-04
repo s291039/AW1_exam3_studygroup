@@ -41,9 +41,10 @@ export default function SelectionPage(props) {
 							className="mt-3" color="#353a40" size="5em" />
 						<div className="mb-3">
 							<small>
-								{(!loggedUser.group_admin && !loggedUser.general_admin) && "Student"}
-								{(loggedUser.group_admin) && "Group Administator"}
-								{(loggedUser.general_admin) && "General Administator"}
+								{(!loggedUser.general_admin && !loggedUser.group_admin) && "Student"}
+								{(!loggedUser.general_admin && loggedUser.group_admin) && "Group Administator"}
+								{(loggedUser.general_admin && !loggedUser.group_admin) && "General Administator"}
+								{(loggedUser.general_admin && loggedUser.group_admin) && "Administrator"}
 							</small>
 						</div>
 
@@ -77,7 +78,7 @@ export default function SelectionPage(props) {
 							</Link>
 						</Row>
 
-						{(loggedUser.group_admin) && (
+						{(loggedUser.general_admin) && (
 							<Row className="d-flex justify-content-center">
 								<Link to='/manage_groups'>
 									<Button

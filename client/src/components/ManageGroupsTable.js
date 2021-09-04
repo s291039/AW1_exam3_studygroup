@@ -5,6 +5,7 @@ import { CurrentUserName, CurrentMessage } from '../App.js'
 import * as Icons from 'react-bootstrap-icons';
 import Navigation from './Navigation.js';
 import ModalGroupAddDelete from './ModalGroupAddDelete.js';
+import ModalGroupStudentRemove from './ModalGroupStudentRemove.js';
 import AddButton from './AddButton.js';
 import dayjs from 'dayjs';
 import API from '../API.js'
@@ -19,18 +20,20 @@ export default function ManageGroupsTable(props) {
 	const { message, setMessage } = useContext(CurrentMessage);
 
 	// props passed from App
-	const { otherGroupsList, setDirty, groupsList, loggedUserGroupsList, showModal, setShowModal } = props;
+	const { otherGroupsList, dirty, setDirty, groupsList, loggedUserGroupsList, showModal, setShowModal } = props;
 
-	const [clickedCourseCode, setClickedCourseCode] = useState('');
+	const [clickedGroup, setClickedGroup] = useState([]);
 	const [showLists, setShowLists] = useState(false);
 	const [clickedStudentsList, setClickedStudentsList] = useState([]);
 	const [clickedMeetingsList, setClickedMeetingsList] = useState([]);
 	const [groupToDelete, setGroupToDelete] = useState([]);
+	const [groupStudentToRemove, setGroupStudentToRemove] = useState([]);
+	const [showStudentRemoveModal, setShowStudentRemoveModal] = useState(false);
 
 
 	useEffect(() => {
 		const getGroupStudents = async () => {
-			const students = await API.getGroupStudents(clickedCourseCode);
+			const students = await API.getGroupStudents(clickedGroup.course_code);
 			let studentsInfo = [];
 			for (let i = 0; i < students.length; i++) {
 				const studInfo = await API.getUserInfo(students[i].student_code);
@@ -39,10 +42,10 @@ export default function ManageGroupsTable(props) {
 			setClickedStudentsList(studentsInfo);
 		}
 		const getGroupMeetings = async () => {
-			const meetings = await API.getGroupMeetings(clickedCourseCode);
+			const meetings = await API.getGroupMeetings(clickedGroup.course_code);
 			setClickedMeetingsList(meetings);
 		}
-		if (clickedCourseCode !== '') {
+		if (Object.keys(clickedGroup).length !== 0 || dirty) {
 			getGroupStudents()
 				// .then(() => {
 				// 	setLoading(false);
@@ -53,16 +56,16 @@ export default function ManageGroupsTable(props) {
 					console.error(err);
 				})
 			getGroupMeetings()
-				// .then(() => {
-				// 	setLoading(false);
-				//  setDirty(false);
-				// })
+				.then(() => {
+					// setLoading(false);
+					setDirty(false);
+				})
 				.catch((err) => {
 					setMessage({ msg: "Impossible to load group's meetings! Please, try again later...", type: 'danger' });
 					console.error(err);
 				})
 		}
-	}, [clickedCourseCode])
+	}, [clickedGroup, dirty])
 
 
 	const getStudentsTableRows = clickedStudentsList.map((s, idx) => (
@@ -76,9 +79,9 @@ export default function ManageGroupsTable(props) {
 						color="#343a40"
 						size="1.1em"
 					/>
-					<u className="ml-1">
+					<strong className="ml-1">
 						{s.student_code}
-					</u>
+					</strong>
 				</span>
 
 				<span>
@@ -90,41 +93,57 @@ export default function ManageGroupsTable(props) {
 					</span>
 				</span>
 
-				{/* FIXME: fix this! */}
-				<small className="ml-3">
-					<Form.Switch
-						size="sm"
-						custom
-						inline
-						type="switch"
-						label="group admin"
-						id={'group_admin' + s.student_code}
-						checked={s.group_admin}
-						onChange={() => {
-							API.updateStudent(s.student_code, !s.group_admin);
-							// TODO: check this!
-							const cSFound = clickedStudentsList.find((cS) => cS.student_code === s.student_code);
-							cSFound.group_admin = !s.group_admin;
-							const modStudList = clickedStudentsList.map((cS) =>
-								cS.student_code === s.student_code ? cSFound : cS
-							);
-							// console.log(modStudList);
-							setClickedStudentsList(modStudList);
+				{loggedUser.general_admin && (
+
+					<>
+						{/* FIXME: fix this! */}
+						<small className="ml-3">
+							<Form.Switch
+								size="sm"
+								custom
+								inline
+								type="switch"
+								label="group admin"
+								id={'group_admin' + s.student_code}
+								checked={s.group_admin}
+								onChange={() => {
+									API.updateStudent(s.student_code, !s.group_admin);
+									// TODO: check this!
+									const cSFound = clickedStudentsList.find((cS) => cS.student_code === s.student_code);
+									cSFound.group_admin = !s.group_admin;
+									const modStudList = clickedStudentsList.map((cS) =>
+										cS.student_code === s.student_code ? cSFound : cS
+									);
+									// console.log(modStudList);
+									setClickedStudentsList(modStudList);
+								}}
+							/>
+						</small>
+					</>
+
+				)}
+
+				{loggedUser.group_admin && (
+
+					<Icons.TrashFill
+						className="ml-1 my-cursor-pointer"
+						color="red"
+						size="0.9em"
+						onClick={() => {
+							history.push(`/manage_groups/${clickedGroup.course_code}/students/${s.student_code}/delete`);
+							const gSToRemove = {
+								student_code: s.student_code,
+								course_code: clickedGroup.course_code,
+								course_name: clickedGroup.course_name,
+								group_color: clickedGroup.group_color
+							};
+							setGroupStudentToRemove(gSToRemove);
+							setShowStudentRemoveModal(true);
 						}}
 					/>
-				</small>
 
-				<Icons.TrashFill
-					className="ml-1 my-cursor-pointer"
-					color="red"
-					size="0.9em"
-					onClick={() => {
-						// history.push(`/general_admin/groups/${g.course_code}/delete`);
+				)}
 
-						// API.removeGroup(g.course_code);
-						setShowModal(true);
-					}}
-				/>
 			</td>
 			<td className="d-none d-sm-table-cell d-md-table-cell d-lg-table-cell"></td>
 			<td className="d-none d-sm-table-cell d-md-table-cell d-lg-table-cell"></td>
@@ -132,7 +151,7 @@ export default function ManageGroupsTable(props) {
 			<td className="d-none d-md-table-cell d-lg-table-cell"></td>
 			<td></td>
 
-		</tr>
+		</tr >
 
 	))
 
@@ -211,12 +230,17 @@ export default function ManageGroupsTable(props) {
 
 						<>
 							{/* TODO: check this! */}
-							{!showLists && (clickedCourseCode === '') && (
+							{!showLists && (Object.keys(clickedGroup).length === 0) && (
 
 								<Icons.ArrowDownCircleFill
 									className="ml-2 my-cursor-pointer"
 									onClick={() => {
-										setClickedCourseCode(g.course_code);
+										const cG = {
+											course_code: g.course_code,
+											course_name: g.course_name,
+											group_color: g.group_color
+										}
+										setClickedGroup(cG);
 										setShowLists(!showLists);
 									}}
 									color="#343a40"
@@ -225,12 +249,12 @@ export default function ManageGroupsTable(props) {
 
 							)}
 
-							{showLists && (clickedCourseCode === g.course_code) && (
+							{showLists && (clickedGroup.course_code === g.course_code) && (
 
 								<Icons.ArrowUpCircleFill
 									className="ml-2 my-cursor-pointer"
 									onClick={() => {
-										setClickedCourseCode('');
+										setClickedGroup([]);
 										setClickedStudentsList([]);
 										setClickedMeetingsList([]);
 										setShowLists(!showLists);
@@ -296,7 +320,7 @@ export default function ManageGroupsTable(props) {
 				</td>
 			</tr>
 
-			{showLists && (clickedCourseCode === g.course_code) && (
+			{showLists && (clickedGroup.course_code === g.course_code) && (
 				<>
 					{getStudentsTableRows}
 					{getMeetingsTableRows}
@@ -365,6 +389,15 @@ export default function ManageGroupsTable(props) {
 							setShowModal={setShowModal}
 							groupToDelete={groupToDelete}
 							setGroupToDelete={setGroupToDelete}
+						/>
+
+						{/* Modal */}
+						<ModalGroupStudentRemove
+							setDirty={setDirty}
+							showStudentRemoveModal={showStudentRemoveModal}
+							setShowStudentRemoveModal={setShowStudentRemoveModal}
+							groupStudentToRemove={groupStudentToRemove}
+							setGroupStudentToRemove={setGroupStudentToRemove}
 						/>
 
 					</Row>

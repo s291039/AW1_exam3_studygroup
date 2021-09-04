@@ -412,6 +412,28 @@ app.get('/api/users/:student_code/groups',
 	}
 )
 
+// PUT /api/groups/:course_code
+app.put('/api/groups/:course_code',
+	isLoggedIn,
+	[
+		check('course_code').isString().isLength(7)
+	],
+	async (req, res) => {
+		// const errors = validationResult(req).formatWith(errorFormatter); // format error message
+		// if (!errors.isEmpty()) {
+		// 	return res.status(422).json({ error: errors.array().join(", ") }); // error message is a single string with all error joined together
+		// }
+
+		try {
+			const result = await groupDao.updateGroupStudentsNumbers(req.body.course_code, req.body.update_number);
+			res.status(200).json(result).end();
+		} catch (err) {
+			res.status(503).json({ error: `Database error during the update of group students number: ${err}.` });
+		}
+
+	}
+)
+
 // GET /api/groups/:course_code/students
 app.get('/api/groups/:course_code/students',
 	isLoggedIn,
@@ -625,20 +647,20 @@ app.delete('/api/users/:student_code/meetings/:meeting_id',
 	}
 )
 
-// DELETE /api/users/:student_code/groups/:course_code
-app.delete('/api/users/:student_code/groups/:course_code',
+// DELETE /api/groups/:course_code/students/:student_code
+app.delete('/api/groups/:course_code/students/:student_code',
 	isLoggedIn,
 	[
-		check('student_code').isString().isLength(7),
-		check('course_code').isString().isLength(7)
+		check('course_code').isString().isLength(7),
+		check('student_code').isString().isLength(7)
 	],
 	async (req, res) => {
 
 		try {
-			const result = groupDao.deleteUserFromGroup(req.params.student_code, req.params.course_code);
+			const result = groupDao.deleteGroupStudent(req.params.course_code, req.params.student_code);
 			res.status(200).json(result).end();
 		} catch (err) {
-			res.status(503).json({ error: `Database error during the deletion of an user from a group; ${err}.` });
+			res.status(503).json({ error: `Database error during the deletion of a student from a group; ${err}.` });
 		}
 	}
 )

@@ -229,6 +229,30 @@ async function getStudentGroups(studentCode) {
 
 }
 
+// call: PUT /api/groups/:course_code
+async function updateGroupsStudentsNumber(courseCode, updateNumber) {
+
+	try {
+		const response = await fetch(BASEURL + `/groups/${courseCode}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				course_code: courseCode,
+				update_number: updateNumber
+			})
+		})
+		const responseJson = await response.json();
+
+		if (response.ok)
+			return responseJson;
+		else
+			throw responseJson;
+	} catch (err) {
+		throw err;
+	}
+
+}
+
 // call: GET /api/groups/:course_code/students
 async function getGroupStudents(courseCode) {
 
@@ -420,6 +444,25 @@ async function removeMeetingRegistration(studentCode, meetingId) {
 
 }
 
+// call: DELETE /api/groups/:course_code/students/:student_code
+async function removeGroupStudent(courseCode, studentCode) {
+
+	try {
+		const response = await fetch(BASEURL + `/groups/${courseCode}/students/${studentCode}`, {
+			method: 'DELETE'
+		})
+		const responseJson = await response.json();
+
+		if (response.ok)
+			return responseJson;
+		else
+			throw responseJson;
+	} catch (err) {
+		throw err;
+	}
+
+}
+
 // call: GET /api/memes?filter=:filter
 async function getFilteredMemes(filter) {
 
@@ -431,25 +474,6 @@ async function getFilteredMemes(filter) {
 			//return memesJson.map((meme) => Object.assign({}, meme, { datetime: dayjs(meme.datetime) }));	// TODO: check this!
 			return responseJson;
 		}
-		else
-			throw responseJson;
-	} catch (err) {
-		throw err;
-	}
-
-}
-
-// call: DELETE /api/users/:student_code/groups/:course_code
-async function removeUserFromGroup(studentCode, courseCode) {
-
-	try {
-		const response = await fetch(BASEURL + `/users/${studentCode}/groups/${courseCode}`, {
-			method: 'DELETE'
-		})
-		const responseJson = await response.json();
-
-		if (response.ok)
-			return responseJson;
 		else
 			throw responseJson;
 	} catch (err) {
@@ -588,5 +612,5 @@ async function updateStudent(studentCode, groupAdmin) {
 }
 
 
-const API = { addGroup, addOtherGroup, removeGroup, removeOtherGroup, getAllGroups, getOtherGroups, getStudentGroups, getGroupStudents, getGroupMeetings, getAllMeetings, getStudentMeetings, updateMeetingStudentsNumber, addGroupRequest, approveGroupRequest, addMeetingRegistration, removeMeetingRegistration, removeUserFromGroup, signUp, logIn, getCurrentUserInfo, logOut, getUserInfo, updateStudent }
+const API = { addGroup, addOtherGroup, removeGroup, removeOtherGroup, getAllGroups, getOtherGroups, getStudentGroups, updateGroupsStudentsNumber, getGroupStudents, getGroupMeetings, getAllMeetings, getStudentMeetings, updateMeetingStudentsNumber, addGroupRequest, approveGroupRequest, addMeetingRegistration, removeMeetingRegistration, removeGroupStudent, signUp, logIn, getCurrentUserInfo, logOut, getUserInfo, updateStudent }
 export default API;
