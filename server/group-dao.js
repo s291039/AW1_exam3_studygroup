@@ -2,31 +2,6 @@
 const db = require('./db');
 
 
-/*
- * DB Structure
- *
- * CREATE TABLE memes (
- * 		id		      	INTEGER		PRIMARY KEY,
- *		img_id      	INTEGER		INTEGER,
- * 		title			TEXT		NOT NULL,
- * 		creator_name	TEXT,
- * 		private     	BOOLEAN		DEFAULT (1) NOT NULL,
- * 		text1			TEXT		NOT NULL,
- * 		text2			TEXT,
- * 		text3			TEXT,
- * 		text_font		TEXT		NOT NULL,
- * 		text_size		INTEGER		DEFAULT (6) NOT NULL,
- * 		text_color		TEXT		NOT NULL,
- * 		text_bold		BOOLEAN		DEFAULT (0) NOT NULL,
- * 		text_italic		BOOLEAN		DEFAULT (0) NOT NULL,
- * 		text_uppercase	BOOLEAN		DEFAULT (1) NOT NULL,
- * 		datetime		DATETIME
- * );
- * 
- * DATETIME format is ISO 8601: 2000-01-01T00:00:00.000Z
- */
-
-
 // get user info
 exports.getUserInfo = (studentCode) => {
 
@@ -90,111 +65,11 @@ exports.setGroupAdmin = (studentCode, courseCode) => {
 
 }
 
-// add a new meme
-// the meme id is added automatically by the DB (autoincrement), and it is returned as result
-exports.createMeme = (meme) => {
-
-	return new Promise((resolve, reject) => {
-		const sql =
-			`INSERT INTO memes(
-				img_id, title, creator_name, private, 
-				text1, text2, text3, 
-				text_font, text_size, text_color, 
-				text_bold, text_italic, text_uppercase,
-				datetime
-				) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,DATETIME(?))`;
-		db.run(sql,
-			[
-				meme.img_id, meme.title, meme.creator_name, meme.private,
-				meme.text1, meme.text2, meme.text3,
-				meme.text_font, meme.text_size, meme.text_color,
-				meme.text_bold, meme.text_italic, meme.text_uppercase,
-				meme.datetime
-			],
-			(err) => {
-				if (err)
-					reject(err);
-				else
-					resolve(this.lastID);
-			}
-		)
-	})
-
-}
-
-// update an existing meme
-exports.updateMeme = (meme, memeId, userName) => {
-
-	return new Promise((resolve, reject) => {
-		const sql =
-			`UPDATE memes SET(
-				title, private,
-				text1, text2, text3,
-				text_font, text_size, text_color,
-				text_bold, text_italic, text_uppercase,
-				datetime
-			) WHERE id = ? and creator_name = ?`;
-		db.run(sql,
-			[
-				meme.title, meme.private,
-				meme.text1, meme.text2, meme.text3,
-				meme.text_font, meme.text_size, meme.text_color,
-				meme.text_bold, meme.text_italic, meme.text_uppercase,
-				meme.datetime,
-				memeId, userName
-			],
-			(err) => {
-				if (err)
-					reject(err);
-				else {
-					//resolve(exports.getMeme(memeId));
-					resolve(this.changes);
-				}
-			})
-	})
-
-}
-
-// delete an existing meme
-exports.deleteMeme = (memeId, userName) => {
-
-	return new Promise((resolve, reject) => {
-		const sql = 'DELETE FROM memes WHERE id = ? AND creator_name = ?';
-		db.run(sql, [memeId, userName], (err) => {
-			if (err)
-				reject(err);
-			else
-				resolve(this.changes);
-		})
-	})
-
-}
-
-// get the meme identified by {memeId}
-exports.getMeme = (memeId, userName) => {
-
-	return new Promise((resolve, reject) => {
-		const sql = 'SELECT * FROM memes WHERE id = ? and creator_name = ?';
-		db.get(sql, [memeId, userName], (err, row) => {
-			if (err)
-				reject(err);
-			else if (row == undefined)
-				resolve({ error: 'Meme not found.' });
-			else {
-				//const meme = { ...row };
-				const meme = dbRowToTask(row);
-				resolve(meme);
-			}
-		})
-	})
-
-}
-
 // add a new group
 exports.createGroup = (group) => {
 
 	return new Promise((resolve, reject) => {
-		const sql = 'INSERT INTO groups(course_code, course_name, course_credits, group_color, group_creation_date, group_students_number) VALUES(?,?,?,?,?,?)';
+		const sql = 'INSERT INTO groups(course_code, course_name, course_credits, group_color, group_creation_date, group_students_number, group_meetings_number) VALUES(?,?,?,?,?,?,?)';
 		db.run(sql,
 			[
 				group.course_code,
@@ -202,7 +77,8 @@ exports.createGroup = (group) => {
 				group.course_credits,
 				group.group_color,
 				group.group_creation_date,
-				group.group_students_number
+				0,
+				0
 			],
 			(err) => {
 				if (err)
@@ -350,11 +226,33 @@ exports.listUserGroups = (studentCode) => {
 
 }
 
-// update an existing group students number
-exports.updateGroupStudentsNumbers = (courseCode, updateNumber) => {
+// update the group students number
+exports.updateGroupStudentsNumber = (courseCode, updateNumber) => {
 
 	return new Promise((resolve, reject) => {
 		const sql = 'UPDATE groups SET group_students_number = group_students_number + ? WHERE course_code = ?';
+		db.run(sql,
+			[
+				updateNumber,
+				courseCode
+			],
+			(err) => {
+				if (err)
+					reject(err);
+				else
+					// resolve(this.lastID);
+					resolve(this.changes);
+			}
+		)
+	})
+
+}
+
+// update the group meetings number
+exports.updateGroupMeetingsNumber = (courseCode, updateNumber) => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'UPDATE groups SET group_meetings_number = group_meetings_number + ? WHERE course_code = ?';
 		db.run(sql,
 			[
 				updateNumber,
@@ -467,8 +365,8 @@ exports.listUserMeetings = (studentCode) => {
 
 }
 
-// update an existing meeting students number
-exports.updateMeetingStudentsNumbers = (meetingId, updateNumber) => {
+// update the meeting students number
+exports.updateMeetingStudentsNumber = (meetingId, updateNumber) => {
 
 	return new Promise((resolve, reject) => {
 		const sql = 'UPDATE meetings SET meeting_students_number = meeting_students_number + ? WHERE meeting_id = ?';
@@ -701,21 +599,56 @@ exports.deleteGroupStudent = (courseCode, studentCode) => {
 
 }
 
-// get the memes filtered by {sqlFilter}
-exports.getFilteredMemes = (sqlFilter, userName) => {
+// get group admins
+exports.listGroupAdmins = (courseCode) => {
 
 	return new Promise((resolve, reject) => {
-		const sql = sqlFilter;
-		db.all(sql, [userName], (err, rows) => {
-			if (err)
+		const sql = 'SELECT student_code FROM students_groups WHERE course_code = ? AND group_admin = ?';
+		db.all(sql, [courseCode, 1], (err, rows) => {
+			if (err) {
 				reject(err);
-			else if (rows == undefined)
-				resolve({ error: 'Memes not found.' });
-			else {
-				//const memes = { ...rows };
-				const memes = rows.map((meme) => dbRowToMeme(meme));
-				resolve(memes);
+				return;
 			}
+			else if (rows === undefined)
+				resolve({ error: `Group's admins not found.` });
+			else
+				resolve(rows);
+		})
+	})
+
+}
+
+// set a group's admin
+exports.setGroupAdmin = (courseCode, studentCode, adminValue) => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'UPDATE students_groups SET group_admin = ? WHERE course_code = ? AND student_code = ?';
+		db.run(sql,
+			[adminValue, courseCode, studentCode],
+			(err) => {
+				if (err)
+					reject(err);
+				else
+					// resolve(this.lastID);
+					resolve(this.changes);
+			}
+		)
+	})
+
+}
+
+// check if user is group admin
+exports.checkIfUserGroupAdmin = (studentCode) => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'SELECT COUNT(*) FROM students_groups WHERE student_code = ? AND group_admin = ?';
+		db.get(sql, [studentCode, 1], (err, rows) => {
+			if (err) {
+				reject(err);
+				return;
+			}
+			else
+				resolve(rows);
 		})
 	})
 

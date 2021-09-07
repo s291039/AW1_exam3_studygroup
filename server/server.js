@@ -6,14 +6,12 @@ const passport = require('passport'); // auth middleware
 const LocalStrategy = require('passport-local').Strategy; // username and password for login
 const groupDao = require('./group-dao.js'); // module for accessing the groups in the DB
 const userDao = require('./user-dao.js'); // module for accessing the users in the DB
-const SQL_FILTERS = require('./data/sqlFilters.js');
-const defaultFilter = 'public';
 
 
-const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
-	// Format express-validate errors as strings
-	return `${location}[${param}]: ${msg}`;
-}
+// const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
+// 	// Format express-validate errors as strings
+// 	return `${location}[${param}]: ${msg}`;
+// }
 
 
 /********************* Set up Passport *********************/
@@ -84,7 +82,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-/************************ MEME APIs ************************/
+/************************ GROUP APIs ************************/
 
 // GET /api/students/:student_code
 app.get('/api/students/:student_code',
@@ -129,136 +127,6 @@ app.put('/api/students/:student_code',
 	}
 )
 
-// POST /api/memes
-app.post('/api/memes',
-	[
-		check('img_id').isInt({ min: 0 }),
-		check('title').isString().isLength({ min: 1, max: 30 }),
-		check('creator_name').isString(),
-		check('text1').isString().notEmpty(),
-		check(['text2', 'text3']).isString(),
-		check(['text_font', 'text_color']).isString().notEmpty(),
-		check(['text_size']).isNumeric().notEmpty(),
-		check(['private', 'text_bold', 'text_italic', 'text_uppercase']).isBoolean(),
-		check('datetime').isISO8601({ strict: true }).optional({ checkFalsy: true })
-	],
-	async (req, res) => {
-		const errors = validationResult(req).formatWith(errorFormatter); // format error message
-		if (!errors.isEmpty()) {
-			return res.status(422).json({ error: errors.array().join(", ") }); // error message is a single string with all error joined together
-		}
-
-		const meme = {
-			img_id: req.body.img_id,
-			title: req.body.title,
-			// creator_name: req.body.creator_name,
-			creator_name: req.user.name, // WARN: user name in the req.body.creator_name does not mean anything because the logged user can change only its own memes
-			private: req.body.private,
-			text1: req.body.text1,
-			text2: req.body.text2,
-			text3: req.body.text3,
-			text_font: req.body.text_font,
-			text_size: req.body.text_size,
-			text_color: req.body.text_color,
-			text_bold: req.body.text_bold,
-			text_italic: req.body.text_italic,
-			text_uppercase: req.body.text_uppercase,
-			datetime: req.body.datetime
-		}
-
-		try {
-			const result = await groupDao.createMeme(meme);
-			res.status(201).json(result).end();
-		} catch (err) {
-			res.status(503).json({ error: `Database error during the creation of new meme: ${err}.` });
-		}
-	}
-)
-
-
-// PUT /api/memes/:id
-app.put('/api/memes/:id',
-	[
-		check('img_id').isInt({ min: 0 }),
-		check('title').isString().isLength({ min: 1, max: 30 }),
-		check('creator_name').isString(),
-		check('text1').isString().notEmpty(),
-		check(['text2', 'text3']).isString(),
-		check(['text_font', 'text_color']).isString().notEmpty(),
-		check(['text_size']).isNumeric().notEmpty(),
-		check(['private', 'text_bold', 'text_italic', 'text_uppercase']).isBoolean(),
-		check('datetime').isISO8601({ strict: true }).optional({ checkFalsy: true })
-	],
-	async (req, res) => {
-		const errors = validationResult(req).formatWith(errorFormatter); // format error message
-		if (!errors.isEmpty()) {
-			return res.status(422).json({ error: errors.array().join(", ") }); // error message is a single string with all error joined together
-		}
-
-		if (Number(req.params.id) !== req.body.id)  // Check if URL and body id mismatch
-			return res.status(422).json({ error: 'URL and body id mismatch.' });
-		else {
-			const meme = {
-				id: req.body.id,
-				title: req.body.title,
-				private: req.body.private,
-				text1: req.body.text1,
-				text2: req.body.text2,
-				text3: req.body.text3,
-				text_font: req.body.text_font,
-				text_size: req.body.text_size,
-				text_color: req.body.text_color,
-				text_bold: req.body.text_bold,
-				text_italic: req.body.text_italic,
-				text_uppercase: req.body.text_uppercase,
-				datetime: req.body.datetime
-			}
-
-			try {
-				const result = await groupDao.updateMeme(meme, meme.id, req.user.id);
-				res.status(200).json(result).end();
-			} catch (err) {
-				res.status(503).json({ error: `Database error during the update of task ${req.params.id}` });
-			}
-		}
-	}
-)
-
-
-// DELETE /api/memes/:id
-app.delete('/api/memes/:id',
-	[
-		check(['id', 'creator_name']).isInt({ min: 1 })
-	],
-	async (req, res) => {
-		try {
-			const result = groupDao.deleteMeme(req.params.id, req.user.id);
-			res.status(200).json(result).end();
-		} catch (err) {
-			res.status(503).json({ error: `Database error during the deletion of meme ${req.params.id}.` });
-		}
-	}
-)
-
-
-// GET /api/memes/:id
-app.get('/api/memes/:id',
-	[
-		check('id').isInt({ min: 1 })
-	],
-	(req, res) => {
-		try {
-			const result = groupDao.getMeme(req.params.id);
-			if (result.error)
-				res.status(404).json(result);
-			else
-				res.json(result);
-		} catch (err) {
-			res.status(500).json({ error: `Database error: ${err}.` });
-		}
-	}
-)
-
 // POST /api/groups
 app.post('/api/groups',
 	[
@@ -267,7 +135,6 @@ app.post('/api/groups',
 		check('course_credits').isInt().notEmpty(),
 		check('group_color').isString().notEmpty(),
 		check('group_creation_date').isDate(), // TODO: check this!
-		check('group_students_number').isInt({ value: 0 }),
 	],
 	async (req, res) => {
 		// const errors = validationResult(req).formatWith(errorFormatter); // format error message
@@ -280,8 +147,7 @@ app.post('/api/groups',
 			course_name: req.body.course_name,
 			course_credits: req.body.course_credits,
 			group_color: req.body.group_color,
-			group_creation_date: req.body.group_creation_date,
-			group_students_number: req.body.group_students_number
+			group_creation_date: req.body.group_creation_date
 		}
 
 		try {
@@ -433,8 +299,8 @@ app.get('/api/users/:student_code/groups',
 	}
 )
 
-// PUT /api/groups/:course_code
-app.put('/api/groups/:course_code',
+// PUT /api/groups/:course_code/students_number
+app.put('/api/groups/:course_code/students_number',
 	isLoggedIn,
 	[
 		check('course_code').isString().isLength(7)
@@ -446,10 +312,32 @@ app.put('/api/groups/:course_code',
 		// }
 
 		try {
-			const result = await groupDao.updateGroupStudentsNumbers(req.body.course_code, req.body.update_number);
+			const result = await groupDao.updateGroupStudentsNumber(req.body.course_code, req.body.update_number);
 			res.status(200).json(result).end();
 		} catch (err) {
 			res.status(503).json({ error: `Database error during the update of group students number: ${err}.` });
+		}
+
+	}
+)
+
+// PUT /api/groups/:course_code/meetings_number
+app.put('/api/groups/:course_code/meetings_number',
+	isLoggedIn,
+	[
+		check('course_code').isString().isLength(7)
+	],
+	async (req, res) => {
+		// const errors = validationResult(req).formatWith(errorFormatter); // format error message
+		// if (!errors.isEmpty()) {
+		// 	return res.status(422).json({ error: errors.array().join(", ") }); // error message is a single string with all error joined together
+		// }
+
+		try {
+			const result = await groupDao.updateGroupMeetingsNumber(req.body.course_code, req.body.update_number);
+			res.status(200).json(result).end();
+		} catch (err) {
+			res.status(503).json({ error: `Database error during the update of group meetings number: ${err}.` });
 		}
 
 	}
@@ -564,7 +452,7 @@ app.put('/api/meetings/:meeting_id',
 		// }
 
 		try {
-			const result = await groupDao.updateMeetingStudentsNumbers(req.body.meeting_id, req.body.update_number);
+			const result = await groupDao.updateMeetingStudentsNumber(req.body.meeting_id, req.body.update_number);
 			res.status(200).json(result).end();
 		} catch (err) {
 			res.status(503).json({ error: `Database error during the update of meeting students number: ${err}.` });

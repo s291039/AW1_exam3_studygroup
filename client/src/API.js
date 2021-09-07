@@ -4,85 +4,6 @@ import dayjs from 'dayjs';
 
 /*********************** Groups API ************************/
 
-// call: POST /api/memes
-async function addMeme(meme) {
-
-	try {
-		const response = await fetch(BASEURL + '/memes', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ ...meme })
-		})
-		const responseJson = await response.json();
-
-		if (response.ok)
-			return responseJson;
-		else
-			throw responseJson;
-	} catch (err) {
-		throw err;
-	}
-
-}
-
-// call: PUT /api/memes/:id
-async function updateMeme(meme) {
-
-	try {
-		const response = await fetch(BASEURL + `/memes/${meme.id}`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ ...meme })
-		})
-		const responseJson = await response.json();
-
-		if (response.ok)
-			return null;
-		else
-			throw responseJson;
-	} catch (err) {
-		throw err;
-	}
-
-}
-
-// call: DELETE /api/memes/:id
-async function deleteMeme(memeId) {
-
-	try {
-		const response = await fetch(BASEURL + `/memes/${memeId}`, {
-			method: 'DELETE'
-		})
-		const responseJson = await response.json();
-
-		if (response.ok)
-			return null;
-		else
-			throw responseJson;
-	} catch (err) {
-		throw err;
-	}
-
-}
-
-// call: GET /api/memes/:id
-async function getMeme(id) {
-
-	try {
-		const response = await fetch(BASEURL + `/memes/${id}`);
-		const responseJson = await response.json();
-
-		if (response.ok)
-			return responseJson;
-		else
-			throw responseJson;
-	} catch (err) {
-		throw err;
-	}
-
-}
-
-
 // call: POST /api/groups
 async function addGroup(group) {
 
@@ -95,8 +16,7 @@ async function addGroup(group) {
 				course_name: group.course_name,
 				course_credits: group.course_credits,
 				group_color: group.group_color,
-				group_creation_date: dayjs().format('YYYY-MM-DD'), // TODO: check this!
-				group_students_number: 0
+				group_creation_date: dayjs().format('YYYY-MM-DD')
 			})
 		})
 		const responseJson = await response.json();
@@ -246,11 +166,35 @@ async function getStudentGroups(studentCode) {
 
 }
 
-// call: PUT /api/groups/:course_code
+// call: PUT /api/groups/:course_code/students_number
 async function updateGroupsStudentsNumber(courseCode, updateNumber) {
 
 	try {
-		const response = await fetch(BASEURL + `/groups/${courseCode}`, {
+		const response = await fetch(BASEURL + `/groups/${courseCode}/students_number`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				course_code: courseCode,
+				update_number: updateNumber
+			})
+		})
+		const responseJson = await response.json();
+
+		if (response.ok)
+			return responseJson;
+		else
+			throw responseJson;
+	} catch (err) {
+		throw err;
+	}
+
+}
+
+// call: PUT /api/groups/:course_code/meetings_number
+async function updateGroupMeetingsNumber(courseCode, updateNumber) {
+
+	try {
+		const response = await fetch(BASEURL + `/groups/${courseCode}/meetings_number`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -598,25 +542,6 @@ async function removeGroupStudent(courseCode, studentCode) {
 
 }
 
-// call: GET /api/memes?filter=:filter
-async function getFilteredMemes(filter) {
-
-	try {
-		const response = await fetch(BASEURL + `/memes?filter=${filter}`);
-		const responseJson = await response.json();
-
-		if (response.ok) {
-			//return memesJson.map((meme) => Object.assign({}, meme, { datetime: dayjs(meme.datetime) }));	// TODO: check this!
-			return responseJson;
-		}
-		else
-			throw responseJson;
-	} catch (err) {
-		throw err;
-	}
-
-}
-
 /*********************** Users API *************************/
 
 // call: POST /api/register
@@ -748,7 +673,7 @@ async function updateStudent(studentCode, groupAdmin) {
 
 
 const API = {
-	addGroup, addOtherGroup, removeGroup, removeOtherGroup, getGroupInfo, getAllGroups, getOtherGroups, getStudentGroups, updateGroupsStudentsNumber, getGroupStudents, getGroupMeetings, getGroupAdminGroups,
+	addGroup, addOtherGroup, removeGroup, removeOtherGroup, getGroupInfo, getAllGroups, getOtherGroups, getStudentGroups, updateGroupsStudentsNumber, updateGroupMeetingsNumber, getGroupStudents, getGroupMeetings, getGroupAdminGroups,
 	getAllMeetings, getStudentMeetings, updateMeetingStudentsNumber, addMeeting, deleteMeeting, addGroupRequest, approveGroupRequest, declineGroupRequest, getAllGroupsRequests, getGroupAdminRequests, addMeetingRegistration, removeMeetingRegistration, removeGroupStudent,
 	signUp, logIn, getCurrentUserInfo, logOut, getUserInfo, updateStudent
 }

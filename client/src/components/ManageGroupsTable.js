@@ -98,7 +98,6 @@ export default function ManageGroupsTable(props) {
 				{loggedUser.general_admin && (
 
 					<>
-						{/* FIXME: fix this! */}
 						<small className="ml-3">
 							<Form.Switch
 								size="sm"
@@ -128,7 +127,7 @@ export default function ManageGroupsTable(props) {
 				{loggedUser.group_admin && (
 
 					<Icons.TrashFill
-						className={(loggedUser.group_admin && !loggedUser.general_admin) ? "ml-3" : "ml-1" + " my-cursor-pointer"}
+						className={(loggedUser.group_admin && !loggedUser.general_admin) ? "ml-3" : "ml-1" + " my-cursor-pointer text-center"}
 						color="red"
 						size="0.9em"
 						onClick={() => {
@@ -307,7 +306,7 @@ export default function ManageGroupsTable(props) {
 					/>
 				</td>
 				{loggedUser.general_admin && (
-					<td className="text-right">
+					<td className="text-center">
 
 						<Icons.TrashFill
 							className="my-cursor-pointer"

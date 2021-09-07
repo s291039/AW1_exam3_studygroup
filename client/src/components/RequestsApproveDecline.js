@@ -26,6 +26,7 @@ export default function RequestsApproveDecline(props) {
 
 	const handleApproveButton = (request) => {
 		API.approveGroupRequest(request.student_code, request.course_code);
+		API.updateGroupsStudentsNumber(request.course_code, +1);
 		setDirty(true);
 	}
 

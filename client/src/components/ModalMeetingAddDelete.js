@@ -121,8 +121,10 @@ export default function ModalMeetingAddDelete(props) {
 			}
 			API.addMeeting(meetingToAdd); // FIXME: fix this!
 		}
-		else
+		else {
 			API.deleteMeeting(meetingToDelete.meeting_id);
+			API.updateGroupMeetingsNumber(meetingToDelete.course_code, -1);
+		}
 
 		setDirty(true);
 		resetStates();
