@@ -27,6 +27,7 @@ const db = require('./db');
  */
 
 
+// get user info
 exports.getUserInfo = (studentCode) => {
 
 	return new Promise((resolve, reject) => {
@@ -37,15 +38,14 @@ exports.getUserInfo = (studentCode) => {
 			else if (row == undefined)
 				resolve({ error: 'User not found.' });
 			else {
-				const user = {
+				const userInfo = {
 					student_code: row.student_code,
 					student_name: row.student_name,
 					student_surname: row.student_surname,
 					general_admin: !!row.general_admin, // from integer to boolean
 					group_admin: !!row.group_admin // from integer to boolean
 				};
-				// const user = dbRowToUser(row);
-				resolve(user);
+				resolve(userInfo);
 			}
 		})
 	})
@@ -194,8 +194,7 @@ exports.getMeme = (memeId, userName) => {
 exports.createGroup = (group) => {
 
 	return new Promise((resolve, reject) => {
-		const sql =
-			'INSERT INTO groups(course_code, course_name, course_credits, group_color, group_creation_date, group_students_number) VALUES(?,?,?,?,?,?)';
+		const sql = 'INSERT INTO groups(course_code, course_name, course_credits, group_color, group_creation_date, group_students_number) VALUES(?,?,?,?,?,?)';
 		db.run(sql,
 			[
 				group.course_code,
@@ -221,8 +220,7 @@ exports.createGroup = (group) => {
 exports.createOtherGroup = (group) => {
 
 	return new Promise((resolve, reject) => {
-		const sql =
-			'INSERT INTO other_groups(course_code, course_name, course_credits, group_color) VALUES(?,?,?,?)';
+		const sql = 'INSERT INTO other_groups(course_code, course_name, course_credits, group_color) VALUES(?,?,?,?)';
 		db.run(sql,
 			[
 				group.course_code,
@@ -267,6 +265,29 @@ exports.deleteOtherGroup = (courseCode) => {
 				reject(err);
 			else
 				resolve();
+		})
+	})
+
+}
+
+// get group info
+exports.getGroupInfo = (courseCode) => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'SELECT * FROM groups WHERE course_code = ?';
+		db.get(sql, [courseCode], (err, row) => {
+			if (err)
+				reject(err);
+			else if (row === undefined)
+				resolve({ error: 'Group not found.' });
+			else {
+				const groupInfo = {
+					course_code: row.course_code,
+					course_name: row.course_name,
+					group_color: row.group_color
+				};
+				resolve(groupInfo);
+			}
 		})
 	})
 
@@ -389,6 +410,25 @@ exports.listGroupMeetings = (courseCode) => {
 
 }
 
+// get logged (group admin) user's groups
+exports.listGroupAdminGroups = (studentCode) => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'SELECT * FROM students_groups WHERE student_code = ? AND group_admin = ?';
+		db.all(sql, [studentCode, 1], (err, rows) => {
+			if (err) {
+				reject(err);
+				return;
+			}
+			// else if (rows === undefined)
+			// 	resolve({ error: '(Group admin) user's groups not found.' });
+			// else
+			resolve(rows);
+		})
+	})
+
+}
+
 // get all meetings
 exports.listMeetings = () => {
 
@@ -412,7 +452,7 @@ exports.listMeetings = () => {
 exports.listUserMeetings = (studentCode) => {
 
 	return new Promise((resolve, reject) => {
-		const sql = 'SELECT meeting_id FROM students_meetings WHERE student_code = ?';
+		const sql = 'SELECT * FROM meetings WHERE meeting_id IN (SELECT meeting_id FROM students_meetings WHERE student_code = ?)';
 		db.all(sql, [studentCode], (err, rows) => {
 			if (err) {
 				reject(err);
@@ -431,8 +471,7 @@ exports.listUserMeetings = (studentCode) => {
 exports.updateMeetingStudentsNumbers = (meetingId, updateNumber) => {
 
 	return new Promise((resolve, reject) => {
-		const sql =
-			'UPDATE meetings SET meeting_students_number = meeting_students_number + ? WHERE meeting_id = ?';
+		const sql = 'UPDATE meetings SET meeting_students_number = meeting_students_number + ? WHERE meeting_id = ?';
 		db.run(sql,
 			[
 				updateNumber,
@@ -454,8 +493,7 @@ exports.updateMeetingStudentsNumbers = (meetingId, updateNumber) => {
 exports.createGroupRequest = (groupRequest) => {
 
 	return new Promise((resolve, reject) => {
-		const sql =
-			'INSERT INTO students_groups(student_code, course_code, group_admin, admin_approved) VALUES(?,?,?,?)';
+		const sql = 'INSERT INTO students_groups(student_code, course_code, group_admin, admin_approved) VALUES(?,?,?,?)';
 		db.run(sql,
 			[
 				groupRequest.student_code,
@@ -475,18 +513,13 @@ exports.createGroupRequest = (groupRequest) => {
 
 }
 
-// update an existing group request
-exports.updateGroupRequest = (approvedGroupRequest) => {
+// approve an existing group request
+exports.approveGroupRequest = (studentCode, courseCode) => {
 
 	return new Promise((resolve, reject) => {
-		const sql =
-			'UPDATE students_groups SET(admin_approved) WHERE student_code = ? and course_code = ?';
+		const sql = 'UPDATE students_groups SET admin_approved = ? WHERE student_code = ? and course_code = ?';
 		db.run(sql,
-			[
-				approvedGroupRequest.admin_approved,
-				approvedGroupRequest.student_code,
-				approvedGroupRequest.course_code
-			],
+			[1, studentCode, courseCode],
 			(err) => {
 				if (err)
 					reject(err);
@@ -495,6 +528,63 @@ exports.updateGroupRequest = (approvedGroupRequest) => {
 					resolve(this.changes);
 			}
 		)
+	})
+
+}
+
+// delete a group request
+exports.deleteGroupRequest = (studentCode, courseCode) => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'DELETE FROM students_groups WHERE student_code = ? AND course_code = ?';
+		db.run(sql,
+			[studentCode, courseCode],
+			(err) => {
+				if (err)
+					reject(err);
+				else
+					// resolve(this.change);
+					resolve();
+			}
+		)
+	})
+
+}
+
+// get all groups requests
+exports.listAllGroupsRequests = () => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'SELECT * FROM students_groups WHERE admin_approved = ?';
+		db.all(sql, [0], (err, rows) => {
+			if (err) {
+				reject(err);
+				return;
+			}
+			// else if (rows === undefined)
+			// 	resolve({ error: 'Requests not found.' });
+			// else
+			resolve(rows);
+		})
+	})
+
+}
+
+// get logged (group admin) user's requests
+exports.listGroupAdminRequests = (studentCode) => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'SELECT student_code, course_code FROM students_groups WHERE admin_approved = ? AND course_code IN (SELECT course_code FROM students_groups WHERE student_code = ? AND group_admin = ?)';
+		db.all(sql, [0, studentCode, 1], (err, rows) => {
+			if (err) {
+				reject(err);
+				return;
+			}
+			// else if (rows === undefined)
+			// 	resolve({ error: `(Group admin) user's requests not found.` });
+			// else
+			resolve(rows);
+		})
 	})
 
 }

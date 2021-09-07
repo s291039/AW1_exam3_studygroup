@@ -1,7 +1,7 @@
 import { Navbar, Container, Col, Dropdown, Button } from 'react-bootstrap';
 import { useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { CurrentUserName } from '../App.js'
+import { CurrentUserName, CurrentGroupAdminRequests } from '../App.js'
 import * as Icons from 'react-bootstrap-icons';
 import API from '../API.js'
 
@@ -10,11 +10,19 @@ export default function Navigation(props) {
 
 	const history = useHistory();
 
+	// contexts
 	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { groupAdminRequests } = useContext(CurrentGroupAdminRequests);
+
+	const haveIGroupRequests = loggedUser.group_admin && groupAdminRequests.length !== 0;
+
+	// go to requests page
+	const goToRequests = async () => {
+		history.push('/requests');
+	}
 
 	// cleans up everything and logOut
 	const handleLogout = async () => {
-
 		setLoggedUser([]);
 		await API.logOut();
 		history.push('/');
@@ -92,24 +100,64 @@ export default function Navigation(props) {
 
 								<Container fluid
 									className="d-none d-md-inline px-2">
-									{`Hi, ${loggedUser.student_name}!`}
+									Welcome, <strong>{loggedUser.student_code}</strong>
 								</Container>
-								<Icons.PersonCircle
-									className="text-dark"
-									color="#353A40"
-									size="1.7em"
-								/>
+
+								{haveIGroupRequests ? (
+
+									<Icons.Envelope
+										className="text-dark"
+										color="red"
+										size="1.6em"
+									/>
+
+								) : (
+
+									<Icons.PersonCircle
+										className="text-dark"
+										color="#353A40"
+										size="1.7em"
+									/>
+
+								)}
 
 							</Dropdown.Toggle>
 
 							{/* Logout */}
 							<Dropdown.Menu className="dropdown-menu-right" variant="light">
+
 								<Dropdown.Item
-									onClick={() => handleLogout()} >
-									{/* <Link to='/' className="my-link"> */}
-									Log out
-									{/* </Link> */}
+									className="text-dark mt-1 mb-2 my-dropdownitems-label"
+									disabled
+								>
+									{`${loggedUser.student_name} ${loggedUser.student_surname}`}
 								</Dropdown.Item>
+
+								{haveIGroupRequests && (
+									<>
+										<hr className="mt-0 mb-0" />
+
+										<Dropdown.Item
+											className="text-danger mt-2 mb-2"
+											onClick={() => goToRequests()}
+										>
+											<span className="my-dropdownitems-label">
+												Requests ({groupAdminRequests.length})
+											</span>
+										</Dropdown.Item>
+									</>
+
+								)}
+
+								<hr className="mt-0 mb-0" />
+
+								<Dropdown.Item
+									className="mt-2"
+									onClick={() => handleLogout()}
+								>
+									Log out
+								</Dropdown.Item>
+
 							</Dropdown.Menu>
 
 						</Dropdown>

@@ -1,7 +1,7 @@
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { useState, useContext } from 'react';
 import { Redirect, Link } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage } from '../App.js'
+import { CurrentUserName, CurrentMessage, CurrentGroupAdminRequests } from '../App.js'
 import Navigation from './Navigation.js';
 import SidebarFilters from './SidebarFilters.js';
 import AddButton from './AddButton.js';
@@ -10,10 +10,12 @@ import * as Icons from 'react-bootstrap-icons';
 
 export default function SelectionPage(props) {
 
+	// contexts
 	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
 	const { message, setMessage } = useContext(CurrentMessage);
+	const { groupAdminRequests } = useContext(CurrentGroupAdminRequests);
 
-	const [sidebarCollapse, setSidebarCollapse] = useState(false);
+	// const [sidebarCollapse, setSidebarCollapse] = useState(false);
 
 
 	return (
@@ -30,7 +32,7 @@ export default function SelectionPage(props) {
 					{/* Navbar */}
 					<Row>
 						<Col>
-							<Navigation />
+							<Navigation groupAdminRequests={groupAdminRequests} />
 						</Col>
 					</Row>
 
@@ -78,7 +80,7 @@ export default function SelectionPage(props) {
 							</Link>
 						</Row>
 
-						{(loggedUser.general_admin) && (
+						{(loggedUser.general_admin || loggedUser.group_admin) && (
 							<Row className="d-flex justify-content-center">
 								<Link to='/manage_groups'>
 									<Button
@@ -88,6 +90,21 @@ export default function SelectionPage(props) {
 										block
 									>
 										Manage groups
+									</Button>
+								</Link>
+							</Row>
+						)}
+
+						{(loggedUser.group_admin) && (
+							<Row className="d-flex justify-content-center">
+								<Link to='/manage_meetings'>
+									<Button
+										className="my-button mb-2"
+										variant="primary"
+										size="lg"
+										block
+									>
+										Manage meetings
 									</Button>
 								</Link>
 							</Row>

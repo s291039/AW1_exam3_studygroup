@@ -27,22 +27,26 @@ export default function MeetingsTable(props) {
 		return groupColor;
 	}
 
+	// TODO: check if I need this!
 	const getCourseCode = (meetingCourseName) => {
 		const courseCode = groupsList.find((g) => g.course_name === meetingCourseName).course_code;
 		return courseCode;
 	}
 
-	// generates all the meetings like a table
+	// generates all the meetings like table rows
 	const getMeetingsTableRows = meetingsList
-		.filter((m) => dayjs(m.meeting_datetime).isAfter(dayjs()))
+		.filter((m) => dayjs(m.meeting_datetime).isAfter(dayjs())) // get future meetings
 		.map((m, idx) => (
 
 			<>
+
+				{/* Meeting info: date, place and time */}
 				<tr key={m.meeting_id + m.meeting_datetime}>
 
 					<td className="text-left">
 
 						{loggedUserMeetingsList.map((uM) => uM.meeting_id).includes(m.meeting_id) ? (
+
 							<span className="text-left container-calendars-icons">
 								<Icons.Calendar2CheckFill
 									className="calendar-icon-1 my-cursor-pointer"
@@ -65,11 +69,11 @@ export default function MeetingsTable(props) {
 										setShowModal(true);
 									}}
 								/>
-								{/* <small className="text-muted">
-						You are already a member
-					</small> */}
+
 							</span>
+
 						) : (
+
 							<span className="text-left">
 								<Icons.Calendar2PlusFill
 									className="my-cursor-pointer"
@@ -81,15 +85,14 @@ export default function MeetingsTable(props) {
 											meeting_id: m.meeting_id,
 											course_name: m.course_name,
 											meeting_datetime: m.meeting_datetime,
+											meeting_duration: m.meeting_duration,
 											group_color: groupsList.find((g) => g.course_name === m.course_name).group_color
 										};
 										setMeetingRegistrationInfo(meetingInfo);
 										setShowModal(true);
 									}}
 								/>
-								{/* <small className="text-muted">
-						(Send a request to become a member)
-					</small> */}
+
 							</span >
 						)}
 
@@ -116,6 +119,8 @@ export default function MeetingsTable(props) {
 					</td>
 
 				</tr>
+
+				{/* Meeting info: group name and students number */}
 				<tr key={m.meeting_id + m.course_code}>
 
 					<td className="text-left">
@@ -139,6 +144,7 @@ export default function MeetingsTable(props) {
 					</td>
 
 				</tr>
+
 			</>
 
 		))
@@ -166,61 +172,21 @@ export default function MeetingsTable(props) {
 						</div>
 
 						<Table bordered={false} striped hover size="md">
-							{/* <thead>
-								<tr>
 
-									{[
-										'Course',
-										'Datetime (start-end?)',
-										'Duration (min)',
-										'Place',
-										'#Students',
-										'Status'
-									].map((label, idx) => (
-										<th key={idx} className="text-left">
-											{label}
-										</th>
-									))}
-
-									<th className="text-left">
-										Course
-									</th>
-									<th className="text-left">
-										Date
-									</th>
-									<th className="text-left d-none d-md-table-cell d-lg-table-cell">
-										Time
-									</th>
-									<th className="text-left d-none d-md-table-cell d-lg-table-cell">
-										Duration
-									</th>
-									<th className="text-left d-none d-md-table-cell d-lg-table-cell">
-										Place
-									</th>
-									<th className="text-center d-none d-md-table-cell d-lg-table-cell">
-										#Students
-									</th>
-									<th className="text-center">
-										Status
-									</th>
-								</tr>
-							</thead> */}
 							<tbody key="meetings_tbody">
 
 								{getMeetingsTableRows}
 
 							</tbody>
+
 						</Table>
-
-						<Container>
-
-						</Container>
 
 						{/* Modal */}
 						<ModalMeetingRegistration
 							setDirty={setDirty}
 							showModal={showModal}
 							setShowModal={setShowModal}
+							loggedUserMeetingsList={loggedUserMeetingsList}
 							meetingRegistrationInfo={meetingRegistrationInfo}
 							setMeetingRegistrationInfo={setMeetingRegistrationInfo}
 						/>

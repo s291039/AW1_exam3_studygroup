@@ -1,7 +1,8 @@
-import { Container, Row, Col, Modal, Form, InputGroup, Table, Button, Badge } from 'react-bootstrap';
-import { useState, useContext } from 'react';
+import { Container, Row, Col, Modal, Form, InputGroup, Table, Button, Badge, Alert } from 'react-bootstrap';
+import { useState, useContext, useEffect } from 'react';
 import { Redirect, Link, useHistory, useLocation } from 'react-router-dom';
 import { CurrentUserName, CurrentMessage } from '../App.js'
+import SuccessErrorAlert from './SuccessErrorAlert.js';
 import API from '../API.js';
 import dayjs from 'dayjs';
 
@@ -13,11 +14,47 @@ export default function ModalMeetingRegistration(props) {
 
 	// contexts
 	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { message, setMessage } = useContext(CurrentMessage);
 
 	// props passed from MeetingsTable
-	const { setDirty, showModal, setShowModal, meetingRegistrationInfo, setMeetingRegistrationInfo } = props;
+	const { setDirty, showModal, setShowModal, loggedUserMeetingsList, meetingRegistrationInfo, setMeetingRegistrationInfo } = props;
+
+	const [meetingOverlapping, setMeetingOverlapping] = useState(false);
+	const [secondWarning, setSecondWarning] = useState(false);
 
 	const AmIRegistering = location.pathname === `/meetings/${meetingRegistrationInfo.meeting_id}/registration`;
+
+	const initialToBeDatetime = dayjs(meetingRegistrationInfo.meeting_datetime);
+	const finalToBeDatetime = dayjs(meetingRegistrationInfo.meeting_datetime).add(meetingRegistrationInfo.meeting_duration, 'minute');
+
+
+	const isOverlapping = (loggedUserMeeting) => {
+		const initialRegisteredDatetime = dayjs(loggedUserMeeting.meeting_datetime);
+		const finalRegisteredDatetime = dayjs(loggedUserMeeting.meeting_datetime).add(loggedUserMeeting.meeting_duration, 'minute');
+
+		return (initialRegisteredDatetime.isBefore(initialToBeDatetime) && finalRegisteredDatetime.isAfter(initialToBeDatetime)) || (initialRegisteredDatetime.isBefore(finalToBeDatetime) && finalRegisteredDatetime.isAfter(finalToBeDatetime));
+	}
+
+
+	useEffect(() => {
+		const checkForOverlapping = async () => {
+			const foundOverlapping = loggedUserMeetingsList.filter((m) => dayjs(m.meeting_datetime).isAfter(dayjs())).find(isOverlapping);
+			console.log(foundOverlapping);
+			if (foundOverlapping !== undefined) // found at least one meeting overlapping
+				setMeetingOverlapping(true);
+		}
+		if (loggedUser.student_code && AmIRegistering) {
+			checkForOverlapping()
+				.then(() => {
+					// setLoading(false);
+					// setDirty(false);
+				})
+				.catch((err) => {
+					setMessage({ msg: "Impossible to check for overlapping! Please, try again later...", type: 'danger' });
+					console.error(err);
+				})
+		}
+	}, [AmIRegistering])
 
 
 	const handleConfirmButton = (event) => {
@@ -72,6 +109,7 @@ export default function ModalMeetingRegistration(props) {
 						</Modal.Title>
 					</Modal.Header>
 					<Modal.Body>
+
 						<div className="mb-2 text-center">
 							{AmIRegistering ? (
 
@@ -83,6 +121,7 @@ export default function ModalMeetingRegistration(props) {
 
 							)}
 						</div>
+
 						<div className="text-center">
 							<Badge
 								pill={false}
@@ -93,16 +132,21 @@ export default function ModalMeetingRegistration(props) {
 								{meetingRegistrationInfo.course_name}
 							</Badge>
 							<div className="mt-1 text-center">
-								<small>
+								<div className="my-meeting-datetime-registration">
 									{dayjs(meetingRegistrationInfo.meeting_datetime).format('YYYY/MM/DD')}
-								</small>
+								</div>
 							</div>
-							<div className="mt-1 text-center">
+							<div className="text-center">
 								<small>
 									{dayjs(meetingRegistrationInfo.meeting_datetime).format('HH:mm')}
 								</small>
 							</div>
 						</div>
+
+						{secondWarning && (
+							<SuccessErrorAlert message={message} />
+						)}
+
 					</Modal.Body>
 
 					<Button variant="link" onClick={handleCancelButton}>
@@ -110,9 +154,23 @@ export default function ModalMeetingRegistration(props) {
 					</Button>
 
 					{AmIRegistering ? (
-						<Button variant="primary" onClick={handleConfirmButton}>
-							Register
-						</Button>
+
+						<>
+							{meetingOverlapping && !secondWarning ? (
+								<Button variant="primary" onClick={() => {
+									setMessage({ title: 'This meeting overlaps with another one.', subtitle: 'Are you sure you want to continue?', type: 'danger' });
+									setSecondWarning(true)
+								}}
+								>
+									Proceed
+								</Button>
+							) : (
+								<Button variant="primary" onClick={handleConfirmButton}>
+									Register
+								</Button>
+							)}
+						</>
+
 					) : (
 						<Button variant="danger" onClick={handleConfirmButton}>
 							Deregister
@@ -120,7 +178,8 @@ export default function ModalMeetingRegistration(props) {
 					)}
 				</Modal>
 
-			)}
+			)
+			}
 		</>
 
 	)

@@ -11,6 +11,7 @@ export default function LoginForm(props) {
 	const location = useLocation();
 	const AmILoggingIn = location.pathname === '/login';
 
+	// contexts
 	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
 	const { message, setMessage } = useContext(CurrentMessage);
 
@@ -31,8 +32,7 @@ export default function LoginForm(props) {
 			const user = await API.logIn(credentials);
 			setLoggedUser(user);
 		} catch (err) {
-			//console.log(err);
-			//setMessage({ text: err, type: 'error' });
+			setMessage({ title: err, type: 'danger' });
 		}
 		setLoading(false);
 
@@ -42,9 +42,9 @@ export default function LoginForm(props) {
 
 		try {
 			await API.signUp(credentials);
-			setMessage({ text: `New user successfully registered.`, type: 'success' });
+			setMessage({ title: 'New user successfully registered.', type: 'success' });
 		} catch (err) {
-			setMessage({ text: `Student code ${credentials.student_code} already used.`, type: 'error' });
+			setMessage({ title: `Student code ${credentials.student_code} already used.`, subtitle: 'Please, try again or reload.', type: 'danger' });
 		}
 		setLoading(false);
 
@@ -160,7 +160,8 @@ export default function LoginForm(props) {
 									}}
 								/>
 								<Form.Control.Feedback className="mb-1" type="invalid">
-									{message === '' &&
+									{message === '' && (
+
 										<>
 											{AmILoggingIn ? (
 												<small>
@@ -172,13 +173,14 @@ export default function LoginForm(props) {
 												</small>
 											)}
 										</>
-									}
+
+									)}
 								</Form.Control.Feedback>
 
 							</Form.Group>
 
 							{/* (potential) ERROR message */}
-							{message !== '' ? <SuccessErrorAlert message={message} /> : <></>}
+							{message !== '' && <SuccessErrorAlert message={message} />}
 
 							{!AmILoggingIn &&
 								<div className="mt-3 text-muted">

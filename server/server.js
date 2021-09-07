@@ -95,10 +95,10 @@ app.get('/api/students/:student_code',
 	async (req, res) => {
 		try {
 			const result = await groupDao.getUserInfo(req.params.student_code);
-			// if (result.error)
-			// 	res.status(404).json(result);
-			// else
-			res.json(result);
+			if (result.error)
+				res.status(404).json(result);
+			else
+				res.json(result);
 		} catch (err) {
 			// res.status(500).json({ error: `Database error: ${err}.` });
 			res.status(500).end;
@@ -355,6 +355,27 @@ app.delete('/api/other_groups/:course_code',
 	}
 )
 
+// GET /api/groups/:course_code
+app.get('/api/groups/:course_code',
+	isLoggedIn,
+	[
+		check('course_code').isString().isLength(7)
+	],
+	async (req, res) => {
+		try {
+			const result = await groupDao.getGroupInfo(req.params.course_code);
+			if (result.error)
+				res.status(404).json(result);
+			else
+				res.json(result);
+		} catch (err) {
+			// res.status(500).json({ error: `Database error: ${err}.` });
+			res.status(500).end;
+		}
+
+	}
+)
+
 // GET /api/groups
 app.get('/api/groups',
 	isLoggedIn,
@@ -473,6 +494,24 @@ app.get('/api/groups/:course_code/meetings',
 	}
 )
 
+// GET /api/students/:student_code/group_admin/groups
+app.get('/api/students/:student_code/group_admin/groups',
+	isLoggedIn,
+	async (req, res) => {
+		try {
+			const result = await groupDao.listGroupAdminGroups(req.params.student_code);
+			// if (result.error)
+			// 	res.status(404).json(result);
+			// else
+			res.json(result);
+		} catch (err) {
+			// res.status(500).json({ error: `Database error: ${err}.` });
+			res.status(500).end;
+		}
+
+	}
+)
+
 // GET /api/meetings
 app.get('/api/meetings',
 	isLoggedIn,
@@ -567,8 +606,8 @@ app.post('/api/users/:student_code/groups/:course_code/request',
 	}
 )
 
-// PUT /api/users/:student_code/groups
-app.put('/api/users/:student_code/groups',
+// PUT /api/users/:student_code/groups/:course_code/request
+app.put('/api/users/:student_code/groups/:course_code/request',
 	isLoggedIn,
 	[
 		check('student_code').isString().isLength(7),
@@ -580,17 +619,65 @@ app.put('/api/users/:student_code/groups',
 		// 	return res.status(422).json({ error: errors.array().join(", ") }); // error message is a single string with all error joined together
 		// }
 
-		const approvedGroupRequest = {
-			student_code: req.body.student_code,
-			course_code: req.body.course_code,
-			admin_approved: 1
-		}
-
 		try {
-			const result = await groupDao.updateGroupRequest(approvedGroupRequest);
+			const result = await groupDao.approveGroupRequest(req.body.student_code, req.body.course_code);
 			res.status(200).json(result).end();
 		} catch (err) {
-			res.status(503).json({ error: `Database error during the update of group request: ${err}.` });
+			res.status(503).json({ error: `Database error during the approval of group request: ${err}.` });
+		}
+
+	}
+)
+
+// DELETE /api/users/:student_code/groups/:course_code/request
+app.delete('/api/users/:student_code/groups/:course_code/request',
+	isLoggedIn,
+	[
+		check('student_code').isString().isLength(7),
+		check('course_code').isString().isLength(7)
+	],
+	async (req, res) => {
+
+		try {
+			const result = groupDao.deleteGroupRequest(req.params.student_code, req.params.course_code);
+			res.status(200).json(result).end();
+		} catch (err) {
+			res.status(503).json({ error: `Database error during the deletion of group request: ${err}.` });
+		}
+	}
+)
+
+// GET /api/groups/requests
+app.get('/api/groups/requests',
+	isLoggedIn, [],
+	async (req, res) => {
+		try {
+			const result = await groupDao.listAllGroupsRequests();
+			// if (result.error)
+			// 	res.status(404).json(result);
+			// else
+			res.json(result);
+		} catch (err) {
+			// res.status(500).json({ error: `Database error: ${err}.` });
+			res.status(500).end;
+		}
+
+	}
+)
+
+// GET /api/users/:student_code/groups/requests
+app.get('/api/users/:student_code/groups/requests',
+	isLoggedIn, [],
+	async (req, res) => {
+		try {
+			const result = await groupDao.listGroupAdminRequests(req.params.student_code);
+			if (result.error)
+				res.status(404).json(result);
+			else
+				res.json(result);
+		} catch (err) {
+			// res.status(500).json({ error: `Database error: ${err}.` });
+			res.status(500).end;
 		}
 
 	}
@@ -642,7 +729,7 @@ app.delete('/api/users/:student_code/meetings/:meeting_id',
 			const result = groupDao.deleteMeetingRegistration(meetingRegistration);
 			res.status(200).json(result).end();
 		} catch (err) {
-			res.status(503).json({ error: `Database error during the deletion of meeting registration; ${err}.` });
+			res.status(503).json({ error: `Database error during the deletion of meeting registration: ${err}.` });
 		}
 	}
 )
@@ -660,7 +747,7 @@ app.delete('/api/groups/:course_code/students/:student_code',
 			const result = groupDao.deleteGroupStudent(req.params.course_code, req.params.student_code);
 			res.status(200).json(result).end();
 		} catch (err) {
-			res.status(503).json({ error: `Database error during the deletion of a student from a group; ${err}.` });
+			res.status(503).json({ error: `Database error during the deletion of a student from a group: ${err}.` });
 		}
 	}
 )

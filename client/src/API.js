@@ -175,6 +175,23 @@ async function removeOtherGroup(courseCode) {
 
 }
 
+// call: GET /api/groups/:course_code
+async function getGroupInfo(courseCode) {
+
+	try {
+		const response = await fetch(BASEURL + `/groups/${courseCode}`);
+		const responseJson = await response.json();
+
+		if (response.ok)
+			return responseJson;
+		else
+			throw responseJson;	// an object with the error coming from the server, mostly unauthenticated user
+	} catch (err) {
+		throw err;
+	}
+
+}
+
 // call: GET /api/groups
 async function getAllGroups() {
 
@@ -289,6 +306,24 @@ async function getGroupMeetings(courseCode) {
 
 }
 
+// call: GET /api/students/:student_code/group_admin/groups
+async function getGroupAdminGroups(studentCode) {
+
+	try {
+		const response = await fetch(BASEURL + `/students/${studentCode}/group_admin/groups`);
+		const responseJson = await response.json();
+
+		if (response.ok) {
+			return responseJson;
+		}
+		else
+			throw responseJson;	// an object with the error coming from the server
+	} catch (err) {
+		throw err;
+	}
+
+}
+
 // call: GET /api/meetings
 async function getAllMeetings() {
 
@@ -375,18 +410,16 @@ async function addGroupRequest(studentCode, courseCode, groupAdmin) {
 
 }
 
-
-// call: PUT /api/users/:student_code/groups
+// call: PUT /api/users/:student_code/groups/:course_code/request
 async function approveGroupRequest(studentCode, courseCode) {
 
 	try {
-		const response = await fetch(BASEURL + `/users/${studentCode}/groups`, {
+		const response = await fetch(BASEURL + `/users/${studentCode}/groups/${courseCode}/request`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				student_code: studentCode,
-				course_code: courseCode,
-				admin_approved: 1
+				course_code: courseCode
 			})
 		})
 		const responseJson = await response.json();
@@ -395,6 +428,62 @@ async function approveGroupRequest(studentCode, courseCode) {
 			return responseJson;
 		else
 			throw responseJson;
+	} catch (err) {
+		throw err;
+	}
+
+}
+
+// call: DELETE /api/users/:student_code/groups/:course_code/request
+async function declineGroupRequest(studentCode, courseCode) {
+
+	try {
+		const response = await fetch(BASEURL + `/users/${studentCode}/groups/${courseCode}/request`, {
+			method: 'DELETE'
+		})
+		const responseJson = await response.json();
+
+		if (response.ok)
+			return responseJson;
+		else
+			throw responseJson;
+	} catch (err) {
+		throw err;
+	}
+
+}
+
+// TODO: check if I need this!
+// call: GET /api/groups/requests
+async function getAllGroupsRequests() {
+
+	try {
+		const response = await fetch(BASEURL + '/groups/requests');
+		const responseJson = await response.json();
+
+		if (response.ok) {
+			return responseJson;
+		}
+		else
+			throw responseJson;	// an object with the error coming from the server
+	} catch (err) {
+		throw err;
+	}
+
+}
+
+// call: GET /api/users/:student_code/groups/requests
+async function getGroupAdminRequests(studentCode) {
+
+	try {
+		const response = await fetch(BASEURL + `/users/${studentCode}/groups/requests`);
+		const responseJson = await response.json();
+
+		if (response.ok) {
+			return responseJson;
+		}
+		else
+			throw responseJson;	// an object with the error coming from the server
 	} catch (err) {
 		throw err;
 	}
@@ -612,5 +701,9 @@ async function updateStudent(studentCode, groupAdmin) {
 }
 
 
-const API = { addGroup, addOtherGroup, removeGroup, removeOtherGroup, getAllGroups, getOtherGroups, getStudentGroups, updateGroupsStudentsNumber, getGroupStudents, getGroupMeetings, getAllMeetings, getStudentMeetings, updateMeetingStudentsNumber, addGroupRequest, approveGroupRequest, addMeetingRegistration, removeMeetingRegistration, removeGroupStudent, signUp, logIn, getCurrentUserInfo, logOut, getUserInfo, updateStudent }
+const API = {
+	addGroup, addOtherGroup, removeGroup, removeOtherGroup, getGroupInfo, getAllGroups, getOtherGroups, getStudentGroups, updateGroupsStudentsNumber, getGroupStudents, getGroupMeetings, getGroupAdminGroups,
+	getAllMeetings, getStudentMeetings, updateMeetingStudentsNumber, addGroupRequest, approveGroupRequest, declineGroupRequest, getAllGroupsRequests, getGroupAdminRequests, addMeetingRegistration, removeMeetingRegistration, removeGroupStudent,
+	signUp, logIn, getCurrentUserInfo, logOut, getUserInfo, updateStudent
+}
 export default API;

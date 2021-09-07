@@ -8,12 +8,15 @@ import SelectionPage from './components/SelectionPage.js';
 import GroupsTable from './components/GroupsTable.js';
 import MeetingsTable from './components/MeetingsTable.js';
 import ManageGroupsTable from './components/ManageGroupsTable.js';
+// import ManageMeetingsTable from './components/ManageMeetingsTable.js';
+import RequestsApproveDecline from './components/RequestsApproveDecline.js';
 import API from './API.js';
 import dayjs from 'dayjs';
 
 
 const CurrentUserName = React.createContext();
 const CurrentMessage = React.createContext();
+const CurrentGroupAdminRequests = React.createContext();
 
 
 export default function App() {
@@ -30,6 +33,8 @@ export default function App() {
 	const [otherGroupsList, setOtherGroupsList] = useState([]);
 	const [meetingsList, setMeetingsList] = useState([]);
 	const [loggedUserMeetingsList, setLoggedUserMeetingsList] = useState([]);
+	const [groupAdminGroups, setGroupAdminGroups] = useState([]);
+	const [groupAdminRequests, setGroupAdminRequests] = useState([]);
 
 
 	const compareByDatetime = (a, b) => {
@@ -150,8 +155,60 @@ export default function App() {
 					setLoading(false);
 					setDirty(false);
 				})
-				.catch(err => {
+				.catch((err) => {
 					setMessage({ msg: "Impossible to load logged user meetings! Please, try again later...", type: 'danger' });
+					console.error(err);
+				})
+		}
+	}, [loggedUser, dirty])
+
+	useEffect(() => {
+		const getGroupAdminGroups = async () => {
+			const groups = await API.getGroupAdminGroups(loggedUser.student_code);
+			setGroupAdminGroups(groups);
+			// setDirty(true); // To force loading the first time
+		}
+		if (loggedUser.group_admin) {
+			getGroupAdminGroups()
+				.then(() => {
+					setLoading(false);
+					setDirty(false);
+				})
+				.catch((err) => {
+					setMessage({ msg: "Impossible to load logged (group admin) user's groups! Please, try again later...", type: 'danger' });
+					console.error(err);
+				})
+		}
+	}, [loggedUser, dirty])
+
+	useEffect(() => {
+		const getGroupAdminRequests = async () => {
+			const requests = await API.getGroupAdminRequests(loggedUser.student_code);
+			let requestsFullInfo = [];
+			for (let i = 0; i < requests.length; i++) {
+				const studentInfo = await API.getUserInfo(requests[i].student_code);
+				const groupInfo = await API.getGroupInfo(requests[i].course_code);
+				const req = {
+					student_code: studentInfo.student_code,
+					student_name: studentInfo.student_name,
+					student_surname: studentInfo.student_surname,
+					course_code: groupInfo.course_code,
+					course_name: groupInfo.course_name,
+					group_color: groupInfo.group_color
+				}
+				requestsFullInfo.push(req);
+			}
+			setGroupAdminRequests(requestsFullInfo);
+			// setDirty(true); // To force loading the first time
+		}
+		if (loggedUser.group_admin) {
+			getGroupAdminRequests()
+				.then(() => {
+					setLoading(false);
+					// setDirty(false);
+				})
+				.catch((err) => {
+					setMessage({ msg: "Impossible to load logged (group admin) user's requests! Please, try again later...", type: 'danger' });
 					console.error(err);
 				})
 		}
@@ -165,108 +222,112 @@ export default function App() {
 				value={{ loggedUser: loggedUser, setLoggedUser: setLoggedUser }}
 			>
 				<CurrentMessage.Provider value={{ message: message, setMessage: setMessage }}>
+					<CurrentGroupAdminRequests.Provider value={{ groupAdminRequests: groupAdminRequests }}>
 
-					{/* <Toast
-						className="p-3"
-						position="top-end"
-						show={error !== ''}
-						delay={3000}
-						autohide
-						onClose={() => setMessage('')}
-					>
-						<Toast.Header closeButton={false}>
-							<strong className="me-auto">Error</strong>
-						</Toast.Header>
-						<Toast.Body>
-							{error.msg}
-						</Toast.Body>
-					</Toast> */}
+						<Router>
+							<Switch>
 
-					<Router>
-						<Switch>
+								<Redirect exact from="/" to='/login' />
 
-							<Redirect exact from="/" to='/login' />
+								{/* LOGIN path */}
+								<Route exact path='/login' render={() => (
 
-							{/* LOGIN path */}
-							<Route exact path='/login' render={() => (
+									<LoginSignupForm
+										loading={loading}
+										setLoading={setLoading}
+									/>
 
-								<LoginSignupForm
-									loading={loading}
-									setLoading={setLoading}
-								/>
+								)} />
 
-							)} />
+								{/* SIGNUP path */}
+								<Route exact path='/signup' render={() => (
 
-							{/* SIGNUP path */}
-							<Route exact path='/signup' render={() => (
+									<LoginSignupForm
+										loading={loading}
+										setLoading={setLoading}
+									/>
 
-								<LoginSignupForm
-									loading={loading}
-									setLoading={setLoading}
-								/>
+								)} />
 
-							)} />
+								{/* MAIN path */}
+								<Route path='/selection' render={() => (
 
-							{/* MAIN path */}
-							<Route path='/selection' render={() => (
+									<SelectionPage />
 
-								<SelectionPage />
-
-							)} />
-
-							{/* GROUPS REQUEST path */}
-							{/* <Route exact path='/groups/request' render={() => (
-
-								<ModalGroupRequest />
-
-							)} /> */}
-
-							{/* GROUPS path */}
-							<Route path='/groups' render={() => (
-
-								<GroupsTable
-									setDirty={setDirty}
-									groupsList={groupsList}
-									loggedUserGroupsList={loggedUserGroupsList}
-									showModal={showModal}
-									setShowModal={setShowModal}
-								/>
-
-							)} />
+								)} />
 
 
-							{/* MEETINGS path */}
-							<Route path='/meetings' render={() => (
+								{/* GROUPS path */}
+								<Route path='/groups' render={() => (
 
-								<MeetingsTable
-									setDirty={setDirty}
-									groupsList={groupsList}
-									meetingsList={meetingsList}
-									loggedUserMeetingsList={loggedUserMeetingsList}
-									showModal={showModal}
-									setShowModal={setShowModal}
-								/>
+									<GroupsTable
+										setDirty={setDirty}
+										groupsList={groupsList}
+										loggedUserGroupsList={loggedUserGroupsList}
+										showModal={showModal}
+										setShowModal={setShowModal}
+									/>
 
-							)} />
+								)} />
 
-							{/* MANAGE GROUPS path */}
-							<Route path='/manage_groups' render={() => (
 
-								<ManageGroupsTable
-									otherGroupsList={otherGroupsList}
-									dirty={dirty}
-									setDirty={setDirty}
-									groupsList={groupsList}
-									loggedUserGroupsList={loggedUserGroupsList}
-									showModal={showModal}
-									setShowModal={setShowModal}
-								/>
+								{/* MEETINGS path */}
+								<Route path='/meetings' render={() => (
 
-							)} />
+									<MeetingsTable
+										setDirty={setDirty}
+										groupsList={groupsList}
+										meetingsList={meetingsList}
+										loggedUserMeetingsList={loggedUserMeetingsList}
+										showModal={showModal}
+										setShowModal={setShowModal}
+									/>
 
-						</Switch>
-					</Router >
+								)} />
 
+								{/* MANAGE GROUPS path */}
+								<Route path='/manage_groups' render={() => (
+
+									<ManageGroupsTable
+										otherGroupsList={otherGroupsList}
+										dirty={dirty}
+										setDirty={setDirty}
+										groupsList={groupsList}
+										loggedUserGroupsList={loggedUserGroupsList}
+										showModal={showModal}
+										setShowModal={setShowModal}
+									/>
+
+								)} />
+
+								{/* MANAGE MEETINGS path */}
+								{/* <Route path='/manage_meetings' render={() => (
+
+									<ManageMeetingsTable
+										dirty={dirty}
+										setDirty={setDirty}
+										meetingsList={meetingsList}
+										loggedUserMeetingsList={loggedUserMeetingsList}
+										showModal={showModal}
+										setShowModal={setShowModal}
+									/>
+
+								)} /> */}
+
+								{/* REQUESTS path */}
+								<Route path='/requests' render={() => (
+
+									<RequestsApproveDecline
+										dirty={dirty}
+										setDirty={setDirty}
+									/>
+
+								)} />
+
+							</Switch>
+						</Router >
+
+					</CurrentGroupAdminRequests.Provider>
 				</CurrentMessage.Provider>
 			</CurrentUserName.Provider>
 		</Container >
@@ -274,4 +335,4 @@ export default function App() {
 
 }
 
-export { CurrentUserName, CurrentMessage };
+export { CurrentUserName, CurrentMessage, CurrentGroupAdminRequests };
