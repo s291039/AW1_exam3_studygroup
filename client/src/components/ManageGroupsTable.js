@@ -1,7 +1,7 @@
 import { Container, Row, Col, Table, Modal, Button, Breadcrumb, Accordion, Form, Collapse, Fade, ListGroup } from 'react-bootstrap';
 import { useState, useContext, useEffect } from 'react';
 import { Redirect, Link, useHistory } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage } from '../App.js'
+import { CurrentUser, CurrentMessage } from '../App.js'
 import * as Icons from 'react-bootstrap-icons';
 import Navigation from './Navigation.js';
 import ModalGroupAddDelete from './ModalGroupAddDelete.js';
@@ -16,11 +16,11 @@ export default function ManageGroupsTable(props) {
 	const history = useHistory();
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 	const { message, setMessage } = useContext(CurrentMessage);
 
 	// props passed from App
-	const { otherGroupsList, dirty, setDirty, groupsList, loggedUserGroupsList, showModal, setShowModal } = props;
+	const { otherGroupsList, dirty, setDirty, groupsList, loggedUserGroupsList, groupAdminGroups, showModal, setShowModal } = props;
 
 	const [clickedGroup, setClickedGroup] = useState([]);
 	const [showLists, setShowLists] = useState(false);
@@ -29,6 +29,8 @@ export default function ManageGroupsTable(props) {
 	const [groupToDelete, setGroupToDelete] = useState([]);
 	const [groupStudentToRemove, setGroupStudentToRemove] = useState([]);
 	const [showStudentRemoveModal, setShowStudentRemoveModal] = useState(false);
+
+	const adminGroupsList = (loggedUser.group_admin && !loggedUser.general_admin) ? groupAdminGroups : groupsList;
 
 
 	useEffect(() => {
@@ -126,7 +128,7 @@ export default function ManageGroupsTable(props) {
 				{loggedUser.group_admin && (
 
 					<Icons.TrashFill
-						className="ml-1 my-cursor-pointer"
+						className={(loggedUser.group_admin && !loggedUser.general_admin) ? "ml-3" : "ml-1" + " my-cursor-pointer"}
 						color="red"
 						size="0.9em"
 						onClick={() => {
@@ -149,9 +151,11 @@ export default function ManageGroupsTable(props) {
 			<td className="d-none d-sm-table-cell d-md-table-cell d-lg-table-cell"></td>
 			<td className="d-none d-md-table-cell d-lg-table-cell"></td>
 			<td className="d-none d-md-table-cell d-lg-table-cell"></td>
-			<td></td>
+			{loggedUser.general_admin && (
+				<td></td>
+			)}
 
-		</tr >
+		</tr>
 
 	))
 
@@ -202,7 +206,9 @@ export default function ManageGroupsTable(props) {
 			<td className="d-none d-sm-table-cell d-md-table-cell d-lg-table-cell"></td>
 			<td className="d-none d-md-table-cell d-lg-table-cell"></td>
 			<td className="d-none d-md-table-cell d-lg-table-cell"></td>
-			<td></td>
+			{loggedUser.general_admin && (
+				<td></td>
+			)}
 
 		</tr>
 
@@ -210,7 +216,7 @@ export default function ManageGroupsTable(props) {
 
 
 	// generates all the groups like a table
-	const getGroupsTableRows = groupsList.map((g, idx) => (
+	const getGroupsTableRows = adminGroupsList.map((g, idx) => (
 
 		<>
 			<tr key={idx}>
@@ -300,24 +306,28 @@ export default function ManageGroupsTable(props) {
 						size="1em"
 					/>
 				</td>
-				<td className="text-center">
-					<Icons.TrashFill
-						className="my-cursor-pointer"
-						color="red"
-						size="1.1em"
-						onClick={() => {
-							history.push(`/manage_groups/${g.course_code}/delete`);
-							const gToDel = {
-								course_code: g.course_code,
-								course_name: g.course_name,
-								course_credits: g.course_credits,
-								group_color: g.group_color
-							};
-							setGroupToDelete(gToDel);
-							setShowModal(true);
-						}}
-					/>
-				</td>
+				{loggedUser.general_admin && (
+					<td className="text-right">
+
+						<Icons.TrashFill
+							className="my-cursor-pointer"
+							color="red"
+							size="1.1em"
+							onClick={() => {
+								history.push(`/manage_groups/${g.course_code}/delete`);
+								const gToDel = {
+									course_code: g.course_code,
+									course_name: g.course_name,
+									course_credits: g.course_credits,
+									group_color: g.group_color
+								};
+								setGroupToDelete(gToDel);
+								setShowModal(true);
+							}}
+						/>
+
+					</td>
+				)}
 			</tr>
 
 			{showLists && (clickedGroup.course_code === g.course_code) && (
@@ -347,7 +357,7 @@ export default function ManageGroupsTable(props) {
 					<Navigation />
 
 					{/* Manage groups (title and table) */}
-					<Row className="mt-5 mb-3 mx-4">
+					<Row className="mt-5 mb-5 mx-4">
 
 						<div
 							className="mt-4 mb-2 my-tablepage-title">
@@ -355,25 +365,6 @@ export default function ManageGroupsTable(props) {
 						</div>
 
 						<Table responsive={false} bordered={false} striped={false} hover size="md">
-							{/* <thead>
-								<tr>
-									<th className="text-left">
-										Course
-									</th>
-									<th className="text-right d-none d-md-table-cell d-lg-table-cell">
-										CFU
-									</th>
-									<th className="text-right d-none d-md-table-cell d-lg-table-cell">
-										Creation
-									</th>
-									<th className="text-center d-none d-sm-table-cell d-md-table-cell d-lg-table-cell">
-										#Students
-									</th>
-									<th className="text-center">
-										Status
-									</th>
-								</tr>
-							</thead> */}
 							<tbody key="manage_groups_tbody">
 
 								{getGroupsTableRows}
@@ -419,12 +410,14 @@ export default function ManageGroupsTable(props) {
 						</Breadcrumb.Item>
 					</Breadcrumb>
 
-					<Link to={'/manage_groups/add'}>
-						<AddButton
-							showModal={showModal}
-							setShowModal={setShowModal}
-						/>
-					</Link>
+					{loggedUser.general_admin && (
+						<Link to={'/manage_groups/add'}>
+							<AddButton
+								showModal={showModal}
+								setShowModal={setShowModal}
+							/>
+						</Link>
+					)}
 
 				</Container>
 

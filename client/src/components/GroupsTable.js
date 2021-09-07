@@ -1,7 +1,7 @@
 import { Container, Row, Col, Table, Modal, Button, ProgressBar, Badge, Breadcrumb } from 'react-bootstrap';
 import { useState, useContext } from 'react';
 import { Redirect, Link, useHistory } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage } from '../App.js'
+import { CurrentUser, CurrentMessage } from '../App.js'
 import * as Icons from 'react-bootstrap-icons';
 import Navigation from './Navigation.js';
 import ModalGroupRequest from './ModalGroupRequest.js';
@@ -13,7 +13,7 @@ export default function GroupsTable(props) {
 	const history = useHistory();
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 	const { message, setMessage } = useContext(CurrentMessage);
 
 	// props passed from App
@@ -60,7 +60,7 @@ export default function GroupsTable(props) {
 				/>
 			</td>
 
-			{/* Join icon (or 'member' message) */}
+			{/* Joined, to join, or 'request sent' icon */}
 			{loggedUserGroupsList.map((uG) => uG.course_code).includes(g.course_code) ? (
 
 				<>
@@ -72,9 +72,6 @@ export default function GroupsTable(props) {
 								color="#28a745"
 								size="1.3em"
 							/>
-							{/* <small className="text-muted">
-						You are already a member
-					</small> */}
 						</td>
 					) : (
 						<td className="text-center">
@@ -82,9 +79,6 @@ export default function GroupsTable(props) {
 								color="#007bff"
 								size="1.1em"
 							/>
-							{/* <small className="text-muted">
-						You are already a member
-					</small> */}
 						</td>
 					)}
 				</>
@@ -107,9 +101,6 @@ export default function GroupsTable(props) {
 							setShowModal(true);
 						}}
 					/>
-					{/* <small className="text-muted">
-						(Send a request to become a member)
-					</small> */}
 				</td >
 
 			)}
@@ -134,7 +125,7 @@ export default function GroupsTable(props) {
 					<Navigation />
 
 					{/* Groups (title and table) */}
-					<Row className="mt-5 mb-3 mx-4">
+					<Row className="mt-5 mb-5 mx-4">
 
 						<div
 							className="mt-4 mb-2 my-tablepage-title">
@@ -142,26 +133,7 @@ export default function GroupsTable(props) {
 						</div>
 
 						<Table responsive={false} bordered={false} striped={false} hover size="md">
-							{/* <thead>
-								<tr>
-									<th className="text-left">
-										Course
-									</th>
-									<th className="text-right d-none d-md-table-cell d-lg-table-cell">
-										CFU
-									</th>
-									<th className="text-right d-none d-md-table-cell d-lg-table-cell">
-										Creation
-									</th>
-									<th className="text-center d-none d-sm-table-cell d-md-table-cell d-lg-table-cell">
-										#Students
-									</th>
-									<th className="text-center">
-										Status
-									</th>
-								</tr>
-							</thead> */}
-							<tbody key="groups_tbody">
+							<tbody>
 
 								{getGroupsTableRows}
 

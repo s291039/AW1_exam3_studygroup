@@ -1,7 +1,7 @@
 import { Navbar, Container, Col, Dropdown, Button } from 'react-bootstrap';
 import { useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { CurrentUserName, CurrentGroupAdminRequests } from '../App.js'
+import { CurrentUser, CurrentGroupAdminRequests } from '../App.js'
 import * as Icons from 'react-bootstrap-icons';
 import API from '../API.js'
 
@@ -11,14 +11,14 @@ export default function Navigation(props) {
 	const history = useHistory();
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 	const { groupAdminRequests } = useContext(CurrentGroupAdminRequests);
 
 	const haveIGroupRequests = loggedUser.group_admin && groupAdminRequests.length !== 0;
 
 	// go to requests page
 	const goToRequests = async () => {
-		history.push('/requests');
+		history.push('/manage_requests');
 	}
 
 	// cleans up everything and logOut

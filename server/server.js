@@ -573,6 +573,53 @@ app.put('/api/meetings/:meeting_id',
 	}
 )
 
+// POST /api/meetings
+app.post('/api/meetings',
+	[
+		check('course_code').isString().isLength(7),
+		check('course_name').isString().notEmpty(),
+		check('meeting_datetime').isString().notEmpty(),
+		check('meeting_duration').isInt().notEmpty(),
+		check('meeting_place').isString().notEmpty()
+	],
+	async (req, res) => {
+		// const errors = validationResult(req).formatWith(errorFormatter); // format error message
+		// if (!errors.isEmpty()) {
+		// 	return res.status(422).json({ error: errors.array().join(", ") }); // error message is a single string with all error joined together
+		// }
+
+		const meeting = {
+			course_code: req.body.course_code,
+			course_name: req.body.course_name,
+			meeting_datetime: req.body.meeting_datetime,
+			meeting_duration: req.body.meeting_duration,
+			meeting_place: req.body.meeting_place
+		}
+
+		try {
+			const result = await groupDao.createMeeting(meeting);
+			res.status(201).json(result).end();
+		} catch (err) {
+			res.status(503).json({ error: `Database error during the creation of new meeting: ${err}.` });
+		}
+	}
+)
+
+// DELETE /api/meetings/:meeting_id
+app.delete('/api/meetings/:meeting_id',
+	isLoggedIn,
+	[
+		check('meeting_id').isInt({ min: 1 })
+	],
+	async (req, res) => {
+		try {
+			const result = groupDao.deleteMeeting(req.params.meeting_id);
+			res.status(200).json(result).end();
+		} catch (err) {
+			res.status(503).json({ error: `Database error during the deletion of meeting: ${err}.` });
+		}
+	}
+)
 
 // POST /api/users/:student_code/groups/:course_code/request
 app.post('/api/users/:student_code/groups/:course_code/request',
@@ -637,7 +684,6 @@ app.delete('/api/users/:student_code/groups/:course_code/request',
 		check('course_code').isString().isLength(7)
 	],
 	async (req, res) => {
-
 		try {
 			const result = groupDao.deleteGroupRequest(req.params.student_code, req.params.course_code);
 			res.status(200).json(result).end();

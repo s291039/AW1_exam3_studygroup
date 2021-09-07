@@ -1,9 +1,8 @@
 import { Container, Row, Col, Button, Alert, Badge, Breadcrumb } from 'react-bootstrap';
 import { useState, useContext } from 'react';
 import { Redirect, Link } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage, CurrentGroupAdminRequests } from '../App.js'
+import { CurrentUser, CurrentMessage, CurrentGroupAdminRequests } from '../App.js'
 import Navigation from './Navigation.js';
-import SidebarFilters from './SidebarFilters.js';
 import AddButton from './AddButton.js';
 import * as Icons from 'react-bootstrap-icons';
 import API from '../API.js';
@@ -12,7 +11,7 @@ import API from '../API.js';
 export default function RequestsApproveDecline(props) {
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 	const { message, setMessage } = useContext(CurrentMessage);
 	const { groupAdminRequests } = useContext(CurrentGroupAdminRequests);
 
@@ -92,7 +91,7 @@ export default function RequestsApproveDecline(props) {
 					<Navigation />
 
 					{/* Requests (title and list) */}
-					<Row className="mt-5 mb-3 mx-4">
+					<Row className="mt-5 mb-5 mx-4">
 
 						<Container
 							className="mt-4 my-tablepage-title">
@@ -121,7 +120,7 @@ export default function RequestsApproveDecline(props) {
 							key='requests_key'
 							active
 						>
-							Requests
+							Manage requests
 						</Breadcrumb.Item>
 					</Breadcrumb>
 

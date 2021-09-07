@@ -1,7 +1,7 @@
 import { Container, Row, Col, Modal, Form, InputGroup, Table, Button, Badge } from 'react-bootstrap';
 import { useState, useContext } from 'react';
 import { Redirect, Link, useHistory } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage } from '../App.js'
+import { CurrentUser, CurrentMessage } from '../App.js'
 import API from '../API.js';
 
 
@@ -10,7 +10,7 @@ export default function ModalGroupRequest(props) {
 	const history = useHistory();
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 
 	// props passed from GroupsTable
 	const { setDirty, showModal, setShowModal, groupRequestInfo, setGroupRequestInfo } = props;

@@ -414,7 +414,7 @@ exports.listGroupMeetings = (courseCode) => {
 exports.listGroupAdminGroups = (studentCode) => {
 
 	return new Promise((resolve, reject) => {
-		const sql = 'SELECT * FROM students_groups WHERE student_code = ? AND group_admin = ?';
+		const sql = 'SELECT * FROM groups WHERE course_code IN( SELECT course_code FROM students_groups WHERE student_code = ? AND group_admin = ?)';
 		db.all(sql, [studentCode, 1], (err, rows) => {
 			if (err) {
 				reject(err);
@@ -483,6 +483,51 @@ exports.updateMeetingStudentsNumbers = (meetingId, updateNumber) => {
 				else
 					// resolve(this.lastID);
 					resolve(this.changes);
+			}
+		)
+	})
+
+}
+
+// create a new meeting
+exports.createMeeting = (meeting) => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'INSERT INTO meetings(course_code, course_name, meeting_datetime, meeting_duration, meeting_place, meeting_students_number) VALUES(?,?,?,?,?,?)';
+		db.run(sql,
+			[
+				meeting.course_code,
+				meeting.course_name,
+				meeting.meeting_datetime,
+				meeting.meeting_duration,
+				meeting.meeting_place,
+				0
+			],
+			(err) => {
+				if (err)
+					reject(err);
+				else
+					// resolve(this.lastID);
+					resolve();
+			}
+		)
+	})
+
+}
+
+// delete an existing meeting
+exports.deleteMeeting = (meetingId) => {
+
+	return new Promise((resolve, reject) => {
+		const sql = 'DELETE FROM meetings WHERE meeting_id = ?';
+		db.run(sql,
+			[meetingId],
+			(err) => {
+				if (err)
+					reject(err);
+				else
+					// resolve(this.change);
+					resolve();
 			}
 		)
 	})

@@ -1,14 +1,13 @@
 import { Container, Row, Col, Table, Modal, Button, Breadcrumb, Accordion, Form, Collapse, Fade, ListGroup } from 'react-bootstrap';
 import { useState, useContext, useEffect } from 'react';
 import { Redirect, Link, useHistory } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage } from '../App.js'
+import { CurrentUser, CurrentMessage } from '../App.js'
 import * as Icons from 'react-bootstrap-icons';
 import Navigation from './Navigation.js';
-import ModalGroupAddDelete from './ModalGroupAddDelete.js';
-import ModalGroupStudentRemove from './ModalGroupStudentRemove.js';
+import ModalMeetingAddDelete from './ModalMeetingAddDelete.js';
 import AddButton from './AddButton.js';
-import dayjs from 'dayjs';
 import API from '../API.js'
+import dayjs from 'dayjs';
 
 
 export default function ManageMeetingsTable(props) {
@@ -16,137 +15,111 @@ export default function ManageMeetingsTable(props) {
 	const history = useHistory();
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 	const { message, setMessage } = useContext(CurrentMessage);
 
 	// props passed from App
-	const { dirty, setDirty, meetingsList, loggedUserMeetingsList, showModal, setShowModal } = props;
+	const { setDirty, groupsList, meetingsList, loggedUserMeetingsList, showModal, setShowModal } = props;
 
 	const [meetingToDelete, setMeetingToDelete] = useState([]);
-	const [groupStudentToRemove, setGroupStudentToRemove] = useState([]);
 
 
-	// generates all the groups like a table
-	const getGroupsTableRows = groupsList.map((g, idx) => (
+	const getGroupColor = (meetingCourseName) => {
+		const groupColor = groupsList.find((g) => g.course_name === meetingCourseName).group_color;
+		return groupColor;
+	}
 
-		<>
-			<tr key={idx}>
-				<td className="text-left">
-					<Icons.CircleFill
-						color={g.group_color}
-						size="1.2em"
-					/>
-					<span className="ml-2 my-course-name">
-						{g.course_name}
-					</span>
-					<span className="ml-2 d-none d-md-inline d-lg-inline">
-						(<u>{g.course_code}</u>)
-					</span>
+	// generates all the meetings like table rows
+	const getMeetingsTableRows = meetingsList
+		.map((m, idx) => (
 
-					{g.group_students_number !== 0 && (
+			<>
 
-						<>
-							{/* TODO: check this! */}
-							{!showLists && (Object.keys(clickedGroup).length === 0) && (
+				{/* Meeting info: date, place and time */}
+				<tr key={m.meeting_id + m.meeting_datetime}>
 
-								<Icons.ArrowDownCircleFill
-									className="ml-2 my-cursor-pointer"
-									onClick={() => {
-										const cG = {
-											course_code: g.course_code,
-											course_name: g.course_name,
-											group_color: g.group_color
-										}
-										setClickedGroup(cG);
-										setShowLists(!showLists);
-									}}
-									color="#343a40"
-									size="1em"
-								/>
+					<td className="text-left">
 
-							)}
+						<span className="text-left">
+							<Icons.Calendar2EventFill
+								color="#343a40"
+								size="1.1em"
+							/>
+						</span >
 
-							{showLists && (clickedGroup.course_code === g.course_code) && (
-
-								<Icons.ArrowUpCircleFill
-									className="ml-2 my-cursor-pointer"
-									onClick={() => {
-										setClickedGroup([]);
-										setClickedStudentsList([]);
-										setClickedMeetingsList([]);
-										setShowLists(!showLists);
-									}}
-									color="#343a40"
-									size="1em"
-								/>
-
-							)}
-						</>
-
-					)}
-
-				</td>
-				<td className="text-right d-none d-md-table-cell d-lg-table-cell">
-					{g.course_credits} <small>CFU</small>
-				</td>
-				<td className="text-center d-none d-lg-table-cell">
-					<small>
-						since
-						<span className="ml-2">
-							{dayjs(g.group_creation_date).format('YYYY/MM/DD')}
+						<span className="ml-2 my-meeting-datetime">
+							{dayjs(m.meeting_datetime).format('YYYY/MM/DD')}
 						</span>
-					</small>
-				</td>
-				<td className="text-center d-none d-sm-table-cell d-md-table-cell d-lg-table-cell">
-					<small className={g.group_students_number === 0 ? "text-warning" : "text-dark"}>
-						{g.group_students_number}
-					</small>
-					<Icons.PeopleFill
-						className="ml-2"
-						color={g.group_students_number === 0 ? "#f6c93c" : "#343a40"}
-						size="1em"
-					/>
-				</td>
-				<td className="text-center d-none d-sm-table-cell d-md-table-cell d-lg-table-cell">
-					<small className={g.group_meetings_number === 0 ? "text-warning" : "text-dark"}>
-						{g.group_meetings_number}
-					</small>
-					<Icons.Calendar2WeekFill
-						className="ml-2"
-						color={g.group_meetings_number === 0 ? "#f6c93c" : "#343a40"}
-						size="1em"
-					/>
-				</td>
-				<td className="text-center">
-					<Icons.TrashFill
-						className="my-cursor-pointer"
-						color="red"
-						size="1.1em"
-						onClick={() => {
-							history.push(`/manage_groups/${g.course_code}/delete`);
-							const gToDel = {
-								course_code: g.course_code,
-								course_name: g.course_name,
-								course_credits: g.course_credits,
-								group_color: g.group_color
-							};
-							setGroupToDelete(gToDel);
-							setShowModal(true);
-						}}
-					/>
-				</td>
-			</tr>
+						<span className="ml-2 d-none d-sm-inline d-md-inline d-lg-inline ">
+							(<u>{m.meeting_place}</u>)
+						</span>
 
-			{showLists && (clickedGroup.course_code === g.course_code) && (
-				<>
-					{getStudentsTableRows}
-					{getMeetingsTableRows}
-				</>
-			)}
+					</td>
 
-		</>
+					<td className="text-right">
+						<Icons.ClockFill
+							className="d-none d-sm-inline d-md-inline d-lg-inline"
+							color="#343a40"
+							size="1em"
+						/>
+						<span className="ml-2 my-meeting-datetime">
+							{dayjs(m.meeting_datetime).format('HH:mm')}
+							<span className="d-none d-sm-inline d-md-inline d-lg-inline">
+								{" - "}
+								{dayjs(m.meeting_datetime).add(m.meeting_duration, 'minute').format('HH:mm')}
+							</span>
+						</span>
+					</td>
 
-	))
+				</tr>
+
+				{/* Meeting info: group name and students number */}
+				<tr key={m.meeting_id + m.course_code}>
+
+					<td className="text-left">
+						<Icons.CircleFill
+							color={getGroupColor(m.course_name)}
+							size="1.2em"
+						/>
+						<span className="ml-2">
+							{m.course_name}
+						</span>
+					</td>
+
+					<td className="text-right">
+						<small>
+							{m.meeting_students_number}
+						</small>
+						<Icons.PeopleFill
+							className="ml-2"
+							color="#343a40"
+							size="1em"
+						/>
+						<Icons.TrashFill
+							className="my-cursor-pointer ml-4"
+							color="red"
+							size="1.1em"
+							onClick={() => {
+								history.push(`/manage_meetings/${m.meeting_id}/delete`);
+								const mToDel = {
+									meeting_id: m.meeting_id,
+									course_code: m.course_code,
+									course_name: m.course_name,
+									group_color: getGroupColor(m.course_name),
+									meeting_datetime: m.meeting_datetime,
+									meeting_students_number: m.meeting_students_number
+								};
+								setMeetingToDelete(mToDel);
+								setShowModal(true);
+							}}
+						/>
+					</td>
+
+				</tr>
+
+			</>
+
+		))
 
 
 	return (
@@ -164,23 +137,25 @@ export default function ManageMeetingsTable(props) {
 					<Navigation />
 
 					{/* Manage meetings (title and table) */}
-					<Row className="mt-5 mb-3 mx-4">
+					<Row className="mt-5 mb-5 mx-4">
 
-						<div
-							className="mt-4 mb-2 my-tablepage-title">
+						<div className="mt-4 mb-2 my-tablepage-title">
 							Manage meetings
 						</div>
 
-						<Table responsive={false} bordered={false} striped={false} hover size="md">
-							<tbody key="manage_meetings_tbody">
+						<Table bordered={false} striped hover size="md">
 
-								{getGroupsTableRows}
+							<tbody>
+
+								{getMeetingsTableRows}
 
 							</tbody>
+
 						</Table>
 
 						{/* Modal */}
 						<ModalMeetingAddDelete
+							groupsList={groupsList}
 							setDirty={setDirty}
 							showModal={showModal}
 							setShowModal={setShowModal}
@@ -200,7 +175,7 @@ export default function ManageMeetingsTable(props) {
 							Selection
 						</Breadcrumb.Item>
 						<Breadcrumb.Item
-							key='manage_groups_key'
+							key='manage_meetings_key'
 							active
 						>
 							Manage meetings
@@ -220,4 +195,5 @@ export default function ManageMeetingsTable(props) {
 		</>
 
 	)
+
 }

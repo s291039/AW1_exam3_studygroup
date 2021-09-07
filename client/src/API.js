@@ -384,6 +384,52 @@ async function updateMeetingStudentsNumber(meetingId, updateNumber) {
 
 }
 
+// call: POST /api/meetings
+async function addMeeting(meeting) {
+
+	try {
+		const response = await fetch(BASEURL + '/meetings', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				course_code: meeting.course_code,
+				course_name: meeting.course_name,
+				meeting_datetime: meeting.meeting_datetime,
+				meeting_duration: meeting.meeting_duration,
+				meeting_place: meeting.meeting_place
+			})
+		})
+		const responseJson = await response.json();
+
+		if (response.ok)
+			return responseJson;
+		else
+			throw responseJson
+	} catch (err) {
+		throw err;
+	}
+
+}
+
+// call: DELETE /api/meetings/:meeting_id
+async function deleteMeeting(meetingId) {
+
+	try {
+		const response = await fetch(BASEURL + `/meetings/${meetingId}`, {
+			method: 'DELETE'
+		})
+		const responseJson = await response.json();
+
+		if (response.ok)
+			return responseJson;
+		else
+			throw responseJson;
+	} catch (err) {
+		throw err;
+	}
+
+}
+
 // call: POST /api/users/:student_code/groups/:course_code/request
 async function addGroupRequest(studentCode, courseCode, groupAdmin) {
 
@@ -703,7 +749,7 @@ async function updateStudent(studentCode, groupAdmin) {
 
 const API = {
 	addGroup, addOtherGroup, removeGroup, removeOtherGroup, getGroupInfo, getAllGroups, getOtherGroups, getStudentGroups, updateGroupsStudentsNumber, getGroupStudents, getGroupMeetings, getGroupAdminGroups,
-	getAllMeetings, getStudentMeetings, updateMeetingStudentsNumber, addGroupRequest, approveGroupRequest, declineGroupRequest, getAllGroupsRequests, getGroupAdminRequests, addMeetingRegistration, removeMeetingRegistration, removeGroupStudent,
+	getAllMeetings, getStudentMeetings, updateMeetingStudentsNumber, addMeeting, deleteMeeting, addGroupRequest, approveGroupRequest, declineGroupRequest, getAllGroupsRequests, getGroupAdminRequests, addMeetingRegistration, removeMeetingRegistration, removeGroupStudent,
 	signUp, logIn, getCurrentUserInfo, logOut, getUserInfo, updateStudent
 }
 export default API;

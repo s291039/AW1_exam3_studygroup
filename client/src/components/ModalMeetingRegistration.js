@@ -1,7 +1,7 @@
 import { Container, Row, Col, Modal, Form, InputGroup, Table, Button, Badge, Alert } from 'react-bootstrap';
 import { useState, useContext, useEffect } from 'react';
 import { Redirect, Link, useHistory, useLocation } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage } from '../App.js'
+import { CurrentUser, CurrentMessage } from '../App.js'
 import SuccessErrorAlert from './SuccessErrorAlert.js';
 import API from '../API.js';
 import dayjs from 'dayjs';
@@ -13,7 +13,7 @@ export default function ModalMeetingRegistration(props) {
 	const location = useLocation();
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 	const { message, setMessage } = useContext(CurrentMessage);
 
 	// props passed from MeetingsTable
@@ -28,18 +28,10 @@ export default function ModalMeetingRegistration(props) {
 	const finalToBeDatetime = dayjs(meetingRegistrationInfo.meeting_datetime).add(meetingRegistrationInfo.meeting_duration, 'minute');
 
 
-	const isOverlapping = (loggedUserMeeting) => {
-		const initialRegisteredDatetime = dayjs(loggedUserMeeting.meeting_datetime);
-		const finalRegisteredDatetime = dayjs(loggedUserMeeting.meeting_datetime).add(loggedUserMeeting.meeting_duration, 'minute');
-
-		return (initialRegisteredDatetime.isBefore(initialToBeDatetime) && finalRegisteredDatetime.isAfter(initialToBeDatetime)) || (initialRegisteredDatetime.isBefore(finalToBeDatetime) && finalRegisteredDatetime.isAfter(finalToBeDatetime));
-	}
-
-
 	useEffect(() => {
 		const checkForOverlapping = async () => {
 			const foundOverlapping = loggedUserMeetingsList.filter((m) => dayjs(m.meeting_datetime).isAfter(dayjs())).find(isOverlapping);
-			console.log(foundOverlapping);
+			// console.log(foundOverlapping);
 			if (foundOverlapping !== undefined) // found at least one meeting overlapping
 				setMeetingOverlapping(true);
 		}
@@ -56,6 +48,13 @@ export default function ModalMeetingRegistration(props) {
 		}
 	}, [AmIRegistering])
 
+
+	const isOverlapping = (loggedUserMeeting) => {
+		const initialRegisteredDatetime = dayjs(loggedUserMeeting.meeting_datetime);
+		const finalRegisteredDatetime = dayjs(loggedUserMeeting.meeting_datetime).add(loggedUserMeeting.meeting_duration, 'minute');
+
+		return (initialRegisteredDatetime.isBefore(initialToBeDatetime) && finalRegisteredDatetime.isAfter(initialToBeDatetime)) || (initialRegisteredDatetime.isBefore(finalToBeDatetime) && finalRegisteredDatetime.isAfter(finalToBeDatetime));
+	}
 
 	const handleConfirmButton = (event) => {
 		event.preventDefault();

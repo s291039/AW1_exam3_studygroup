@@ -178,47 +178,6 @@
 	font-size: 115%;
 }
 
-/******************** SidebarFilters.js ********************/
-/*
- * Force the Sidebar to be always displayed when
- * the window is big enough.
- * This fixes an edge case that resulted in the
- * collapsing animation to play when not needed.
- */
-@media (min-width: 768px) {
-	.collapsing {
-		height: 100% !important;
-	}
-}
-.my-listgroup {
-	position: sticky;
-	top: 0;
-}
-@media (min-width: 768px) {
-	.list-group-item {
-		height: 2.6em;
-		padding: 0.3em 1.8em;
-		font-size: 0.9em;
-		text-align: start;
-	}
-}
-@media (max-width: 768px) {
-	.list-group-item {
-		height: 2.8em;
-		padding: 0.6em;
-		font-size: 0.9em;
-		text-align: center;
-	}
-	.list-group-item:not(.active) {
-		background-color: var(--main-bg);
-		border-color: var(--main-bg);
-		color: white;
-	}
-	.list-group-item:not(.active):hover {
-		color: #78b8fd;
-	}
-}
-
 /******************** MeetingsTable.js **********************/
 .table {
 	outline-style: solid;

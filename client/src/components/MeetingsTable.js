@@ -1,7 +1,7 @@
 import { Container, Row, Col, Table, Modal, Button, ProgressBar, Badge, Breadcrumb } from 'react-bootstrap';
 import { useState, useContext } from 'react';
 import { Redirect, Link, useHistory } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage } from '../App.js'
+import { CurrentUser, CurrentMessage } from '../App.js'
 import * as Icons from 'react-bootstrap-icons';
 import Navigation from './Navigation.js';
 import ModalMeetingRegistration from './ModalMeetingRegistration.js';
@@ -13,7 +13,7 @@ export default function MeetingsTable(props) {
 	const history = useHistory();
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 	const { message, setMessage } = useContext(CurrentMessage);
 
 	// props passed from App
@@ -25,12 +25,6 @@ export default function MeetingsTable(props) {
 	const getGroupColor = (meetingCourseName) => {
 		const groupColor = groupsList.find((g) => g.course_name === meetingCourseName).group_color;
 		return groupColor;
-	}
-
-	// TODO: check if I need this!
-	const getCourseCode = (meetingCourseName) => {
-		const courseCode = groupsList.find((g) => g.course_name === meetingCourseName).course_code;
-		return courseCode;
 	}
 
 	// generates all the meetings like table rows
@@ -69,7 +63,6 @@ export default function MeetingsTable(props) {
 										setShowModal(true);
 									}}
 								/>
-
 							</span>
 
 						) : (
@@ -92,8 +85,8 @@ export default function MeetingsTable(props) {
 										setShowModal(true);
 									}}
 								/>
-
 							</span >
+
 						)}
 
 						<span className="ml-2 my-meeting-datetime">
@@ -103,6 +96,7 @@ export default function MeetingsTable(props) {
 							(<u>{m.meeting_place}</u>)
 						</span>
 					</td>
+
 					<td className="text-right">
 						<Icons.ClockFill
 							className="d-none d-sm-inline d-md-inline d-lg-inline"
@@ -132,6 +126,7 @@ export default function MeetingsTable(props) {
 							{m.course_name}
 						</span>
 					</td>
+
 					<td className="text-right">
 						<small>
 							{m.meeting_students_number}
@@ -164,8 +159,8 @@ export default function MeetingsTable(props) {
 					{/* Navbar */}
 					<Navigation />
 
-					{/* Meetings  (title and table) */}
-					<Row className="mt-5 mb-3 mx-4">
+					{/* Meetings (title and table) */}
+					<Row className="mt-5 mb-5 mx-4">
 
 						<div className="mt-4 mb-2 my-tablepage-title">
 							Meetings
@@ -173,7 +168,7 @@ export default function MeetingsTable(props) {
 
 						<Table bordered={false} striped hover size="md">
 
-							<tbody key="meetings_tbody">
+							<tbody>
 
 								{getMeetingsTableRows}
 

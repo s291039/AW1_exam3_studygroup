@@ -1,7 +1,7 @@
 import { Container, Row, Col, Modal, Form, InputGroup, Table, Button, Badge } from 'react-bootstrap';
 import { useState, useContext } from 'react';
 import { Redirect, Link, useLocation, useHistory } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage } from '../App.js'
+import { CurrentUser, CurrentMessage } from '../App.js'
 import * as Icons from 'react-bootstrap-icons';
 import API from '../API.js';
 
@@ -11,7 +11,7 @@ export default function ModalGroupStudentRemove(props) {
 	const history = useHistory();
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 
 	// props passed from ManageGroupsTable
 	const { setDirty, showStudentRemoveModal, setShowStudentRemoveModal, groupStudentToRemove, setGroupStudentToRemove } = props;

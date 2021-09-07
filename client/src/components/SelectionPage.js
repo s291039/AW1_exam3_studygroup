@@ -1,9 +1,8 @@
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col, Button, Breadcrumb } from 'react-bootstrap';
 import { useState, useContext } from 'react';
 import { Redirect, Link } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage, CurrentGroupAdminRequests } from '../App.js'
+import { CurrentUser, CurrentMessage, CurrentGroupAdminRequests } from '../App.js'
 import Navigation from './Navigation.js';
-import SidebarFilters from './SidebarFilters.js';
 import AddButton from './AddButton.js';
 import * as Icons from 'react-bootstrap-icons';
 
@@ -11,7 +10,7 @@ import * as Icons from 'react-bootstrap-icons';
 export default function SelectionPage(props) {
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 	const { message, setMessage } = useContext(CurrentMessage);
 	const { groupAdminRequests } = useContext(CurrentGroupAdminRequests);
 
@@ -41,7 +40,7 @@ export default function SelectionPage(props) {
 
 						<Icons.PersonCircle
 							className="mt-3" color="#353a40" size="5em" />
-						<div className="mb-3">
+						<div className="mb-2">
 							<small>
 								{(!loggedUser.general_admin && !loggedUser.group_admin) && "Student"}
 								{(!loggedUser.general_admin && loggedUser.group_admin) && "Group Administator"}
@@ -50,14 +49,10 @@ export default function SelectionPage(props) {
 							</small>
 						</div>
 
-						<h3 className="mb-2 font-weight-normal">
-							I'm here for
-						</h3>
-
 						<Row className="d-flex justify-content-center">
 							<Link to='/groups'>
 								<Button
-									className="my-button mb-2"
+									className="my-button mt-4 mb-2"
 									variant="primary"
 									size="lg"
 									block

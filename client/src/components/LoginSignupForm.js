@@ -1,7 +1,7 @@
 import { Container, Row, Form, Button, Spinner } from 'react-bootstrap';
 import { useState, useContext } from 'react';
 import { Redirect, Link, useLocation } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage } from '../App.js'
+import { CurrentUser, CurrentMessage } from '../App.js'
 import SuccessErrorAlert from './SuccessErrorAlert.js';
 import API from '../API.js';
 
@@ -12,7 +12,7 @@ export default function LoginForm(props) {
 	const AmILoggingIn = location.pathname === '/login';
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 	const { message, setMessage } = useContext(CurrentMessage);
 
 	// props passed from App
@@ -164,11 +164,11 @@ export default function LoginForm(props) {
 
 										<>
 											{AmILoggingIn ? (
-												<small>
+												<small className="text-center">
 													Please check student code and/or password field(s).
 												</small>
 											) : (
-												<small>
+												<small className="text-center">
 													Please check student code, password, name and/or surname field(s).
 												</small>
 											)}

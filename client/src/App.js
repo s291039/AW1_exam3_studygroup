@@ -8,13 +8,13 @@ import SelectionPage from './components/SelectionPage.js';
 import GroupsTable from './components/GroupsTable.js';
 import MeetingsTable from './components/MeetingsTable.js';
 import ManageGroupsTable from './components/ManageGroupsTable.js';
-// import ManageMeetingsTable from './components/ManageMeetingsTable.js';
+import ManageMeetingsTable from './components/ManageMeetingsTable.js';
 import RequestsApproveDecline from './components/RequestsApproveDecline.js';
 import API from './API.js';
 import dayjs from 'dayjs';
 
 
-const CurrentUserName = React.createContext();
+const CurrentUser = React.createContext();
 const CurrentMessage = React.createContext();
 const CurrentGroupAdminRequests = React.createContext();
 
@@ -218,7 +218,7 @@ export default function App() {
 	return (
 
 		<Container fluid className="my-app mx-0 px-0">
-			<CurrentUserName.Provider
+			<CurrentUser.Provider
 				value={{ loggedUser: loggedUser, setLoggedUser: setLoggedUser }}
 			>
 				<CurrentMessage.Provider value={{ message: message, setMessage: setMessage }}>
@@ -294,6 +294,7 @@ export default function App() {
 										setDirty={setDirty}
 										groupsList={groupsList}
 										loggedUserGroupsList={loggedUserGroupsList}
+										groupAdminGroups={groupAdminGroups}
 										showModal={showModal}
 										setShowModal={setShowModal}
 									/>
@@ -301,21 +302,22 @@ export default function App() {
 								)} />
 
 								{/* MANAGE MEETINGS path */}
-								{/* <Route path='/manage_meetings' render={() => (
+								<Route path='/manage_meetings' render={() => (
 
 									<ManageMeetingsTable
 										dirty={dirty}
 										setDirty={setDirty}
+										groupsList={groupsList}
 										meetingsList={meetingsList}
 										loggedUserMeetingsList={loggedUserMeetingsList}
 										showModal={showModal}
 										setShowModal={setShowModal}
 									/>
 
-								)} /> */}
+								)} />
 
 								{/* REQUESTS path */}
-								<Route path='/requests' render={() => (
+								<Route path='/manage_requests' render={() => (
 
 									<RequestsApproveDecline
 										dirty={dirty}
@@ -329,10 +331,10 @@ export default function App() {
 
 					</CurrentGroupAdminRequests.Provider>
 				</CurrentMessage.Provider>
-			</CurrentUserName.Provider>
+			</CurrentUser.Provider>
 		</Container >
 	)
 
 }
 
-export { CurrentUserName, CurrentMessage, CurrentGroupAdminRequests };
+export { CurrentUser, CurrentMessage, CurrentGroupAdminRequests };

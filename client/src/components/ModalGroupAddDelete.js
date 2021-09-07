@@ -1,7 +1,7 @@
 import { Container, Row, Col, Modal, Form, InputGroup, Table, Button, Badge } from 'react-bootstrap';
 import { useState, useContext } from 'react';
 import { Redirect, Link, useLocation, useHistory } from 'react-router-dom';
-import { CurrentUserName, CurrentMessage } from '../App.js'
+import { CurrentUser, CurrentMessage } from '../App.js'
 import API from '../API.js';
 
 
@@ -12,7 +12,7 @@ export default function ModalGroupAddDelete(props) {
 	const history = useHistory();
 
 	// contexts
-	const { loggedUser, setLoggedUser } = useContext(CurrentUserName);
+	const { loggedUser, setLoggedUser } = useContext(CurrentUser);
 
 	// props passed from ManageGroupsTable
 	const { otherGroupsList, setDirty, showModal, setShowModal, groupToDelete, setGroupToDelete } = props;
@@ -40,7 +40,6 @@ export default function ModalGroupAddDelete(props) {
 			</>
 
 		))
-
 
 	const handleConfirmButton = (event) => {
 		event.preventDefault();
@@ -114,7 +113,7 @@ export default function ModalGroupAddDelete(props) {
 											<Form.Control
 												as="select"
 												className="text-center mb-2"
-												id="other_groups"
+												id="other_groups_formselect"
 												custom
 												onChange={(ev) => {
 													const otherGroup = otherGroupsList.find((oG) => oG.course_code === ev.target.value);
@@ -123,7 +122,6 @@ export default function ModalGroupAddDelete(props) {
 											>
 												<option>...</option>
 												{getOtherGroupsOptions}
-
 											</Form.Control>
 										</Row>
 									)}
@@ -186,7 +184,7 @@ export default function ModalGroupAddDelete(props) {
 						</Button>
 					) : (
 						<Button variant="link" onClick={() => setSelectedOtherGroup({})}>
-							Change choice
+							Change group
 						</Button>
 					)}
 
@@ -204,8 +202,7 @@ export default function ModalGroupAddDelete(props) {
 
 				</Modal>
 
-			)
-			}
+			)}
 		</>
 
 	)
