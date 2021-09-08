@@ -406,7 +406,7 @@ exports.createMeeting = (meeting) => {
 					reject(err);
 				else
 					// resolve(this.lastID);
-					resolve();
+					resolve(this.changes); // FIXME: fix this!
 			}
 		)
 	})
